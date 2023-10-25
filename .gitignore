@@ -1,0 +1,15 @@
+*.sw*
+
+tmp
+tags
+logs
+bin
+pkg
+
+.idea
+*.iml
+*DS_Store
+.vscode
+
+conf/server/rewrite/server_conf_rewrite.toml
+conf/http/*_http_ngx.conf*
