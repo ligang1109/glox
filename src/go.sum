@@ -1,0 +1,6 @@
+github.com/goinbox/color v1.0.0 h1:w+HhREKjA3rnGdIxcVbp+ssFvPfMocIHjBbXNMH9gGU=
+github.com/goinbox/color v1.0.0/go.mod h1:LKewYUaZLTr4h7G8CUv4Lt6JmOAD0wQePGEIF8faaqk=
+github.com/goinbox/golog v4.2.2+incompatible h1:0KPzy5vyGdtwSGh3nzqRzjT+2IYW+Y0yXqtL+QN723Q=
+github.com/goinbox/golog v4.2.2+incompatible/go.mod h1:LpDh2j8NT1DzCFjkpE3joekJWaVxUt+BolHh52GJqtA=
+github.com/goinbox/gomisc v1.4.0 h1:nxhAuPprXkaoXtRHMW3jABNBIDXPNH/RfCXXDiDRThI=
+github.com/goinbox/gomisc v1.4.0/go.mod h1:SPnA6bKoY+HIxNBbO2zRX0jBHu0lmi3nCLbZR40aiSs=
