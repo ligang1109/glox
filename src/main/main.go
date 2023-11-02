@@ -25,7 +25,10 @@ func main() {
 			log.Logger.Error("runFile error", golog.ErrorField(err))
 		}
 	} else {
-		runPrompt()
+		err := runPrompt()
+		if err != nil {
+			log.Logger.Error("runPrompt error", golog.ErrorField(err))
+		}
 	}
 }
 
@@ -38,12 +41,21 @@ func runFile(path string) error {
 		_ = f.Close()
 	}()
 
+	err = scanFile(f)
+	if err != nil {
+		return fmt.Errorf("scanFile error: %w", err)
+	}
+
+	return nil
+}
+
+func scanFile(f *os.File) error {
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		run(scanner.Text())
 	}
 
-	err = scanner.Err()
+	err := scanner.Err()
 	if err != nil {
 		return fmt.Errorf("scanner.Scan error: %w", err)
 	}
@@ -51,8 +63,13 @@ func runFile(path string) error {
 	return nil
 }
 
-func runPrompt() {
+func runPrompt() error {
+	err := scanFile(os.Stdin)
+	if err != nil {
+		return fmt.Errorf("scanFile error: %w", err)
+	}
 
+	return nil
 }
 
 func run(line string) {
