@@ -41,18 +41,48 @@ func runFile(path string) error {
 		_ = f.Close()
 	}()
 
-	err = scanFile(f)
+	type errMsg struct {
+		msg string
+		err error
+	}
+	var errData []*errMsg
+
+	scanner := bufio.NewScanner(f)
+	lineNum := 1
+	for scanner.Scan() {
+		err = run(scanner.Text())
+		if err != nil {
+			errData = append(errData, &errMsg{
+				msg: fmt.Sprintf("run line %d error", lineNum),
+				err: err,
+			})
+		}
+
+		lineNum++
+	}
+
+	for _, item := range errData {
+		log.Logger.Error(item.msg, golog.ErrorField(item.err))
+	}
+
+	err = scanner.Err()
 	if err != nil {
-		return fmt.Errorf("scanFile error: %w", err)
+		return fmt.Errorf("scanner.Scan error: %w", err)
 	}
 
 	return nil
 }
 
-func scanFile(f *os.File) error {
-	scanner := bufio.NewScanner(f)
+func runPrompt() error {
+	fmt.Print("> ")
+	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		run(scanner.Text())
+		err := run(scanner.Text())
+		if err != nil {
+			log.Logger.Error("run error", golog.ErrorField(err))
+		}
+
+		fmt.Print("> ")
 	}
 
 	err := scanner.Err()
@@ -63,15 +93,8 @@ func scanFile(f *os.File) error {
 	return nil
 }
 
-func runPrompt() error {
-	err := scanFile(os.Stdin)
-	if err != nil {
-		return fmt.Errorf("scanFile error: %w", err)
-	}
-
-	return nil
-}
-
-func run(line string) {
+func run(line string) error {
 	fmt.Println(line)
+
+	return fmt.Errorf("test")
 }
