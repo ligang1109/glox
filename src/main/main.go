@@ -33,42 +33,12 @@ func main() {
 }
 
 func runFile(path string) error {
-	f, err := os.Open(path)
+	content, err := os.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("os.Open error: %w", err)
-	}
-	defer func() {
-		_ = f.Close()
-	}()
-
-	type errMsg struct {
-		msg string
-		err error
-	}
-	var errData []*errMsg
-
-	scanner := bufio.NewScanner(f)
-	lineNum := 1
-	for scanner.Scan() {
-		err = run(scanner.Text())
-		if err != nil {
-			errData = append(errData, &errMsg{
-				msg: fmt.Sprintf("run line %d error", lineNum),
-				err: err,
-			})
-		}
-
-		lineNum++
+		return fmt.Errorf("os.ReadFile error: %w", err)
 	}
 
-	for _, item := range errData {
-		log.Logger.Error(item.msg, golog.ErrorField(item.err))
-	}
-
-	err = scanner.Err()
-	if err != nil {
-		return fmt.Errorf("scanner.Scan error: %w", err)
-	}
+	run(string(content))
 
 	return nil
 }
@@ -77,11 +47,7 @@ func runPrompt() error {
 	fmt.Print("> ")
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		err := run(scanner.Text())
-		if err != nil {
-			log.Logger.Error("run error", golog.ErrorField(err))
-		}
-
+		run(scanner.Text())
 		fmt.Print("> ")
 	}
 
@@ -93,8 +59,6 @@ func runPrompt() error {
 	return nil
 }
 
-func run(line string) error {
-	fmt.Println(line)
-
-	return fmt.Errorf("test")
+func run(source string) {
+	fmt.Println(source)
 }
