@@ -32,8 +32,8 @@ const (
 	Number     Type = "NUMBER"
 
 	// Keywords.
-	And    Type = "AND"
-	Class  Type = "CLASS"
+	And Type = "AND"
+
 	Else   Type = "ELSE"
 	False  Type = "FALSE"
 	Fun    Type = "FUN"
