@@ -1,6 +1,9 @@
 package scanner
 
 import (
+	"fmt"
+
+	"glox/log"
 	"glox/token"
 )
 
@@ -11,6 +14,8 @@ type Scanner struct {
 	start   int
 	current int
 	line    int
+
+	hasError bool
 }
 
 func (s *Scanner) ScanTokens(source string) []*token.Token {
@@ -35,6 +40,10 @@ func (s *Scanner) ScanTokens(source string) []*token.Token {
 	return s.tokens
 }
 
+func (s *Scanner) HasError() bool {
+	return s.hasError
+}
+
 func (s *Scanner) init(source string) {
 	s.source = source
 	s.tokens = []*token.Token{}
@@ -42,6 +51,8 @@ func (s *Scanner) init(source string) {
 	s.start = 0
 	s.current = 0
 	s.line = 1
+
+	s.hasError = false
 }
 
 func (s *Scanner) isAtEnd() bool {
@@ -71,14 +82,45 @@ func (s *Scanner) scanToken() {
 		s.addToken(token.Semicolon, nil)
 	case "*":
 		s.addToken(token.Star, nil)
+	case "!":
+		if s.match("=") {
+			s.addToken(token.BangEqual, nil)
+		} else {
+			s.addToken(token.Bang, nil)
+		}
+	case "=":
+		if s.match("=") {
+			s.addToken(token.EqualEqual, nil)
+		} else {
+			s.addToken(token.Equal, nil)
+		}
+	case "<":
+		if s.match("=") {
+			s.addToken(token.LessEqual, nil)
+		} else {
+			s.addToken(token.Less, nil)
+		}
+	case ">":
+		if s.match("=") {
+			s.addToken(token.GreaterEqual, nil)
+		} else {
+			s.addToken(token.Greater, nil)
+		}
+	default:
+		s.hasError = true
+		log.Logger.Error(fmt.Sprintf("line %d error: Unexpected character.", s.line))
 	}
 }
 
 func (s *Scanner) advance() string {
-	c := string(s.source[s.current])
+	c := s.charAt(s.current)
 	s.current++
 
 	return c
+}
+
+func (s *Scanner) charAt(pos int) string {
+	return string(s.source[pos])
 }
 
 func (s *Scanner) addToken(tokenType token.Type, literal any) {
@@ -88,4 +130,17 @@ func (s *Scanner) addToken(tokenType token.Type, literal any) {
 		Literal:   literal,
 		Line:      s.line,
 	})
+}
+
+func (s *Scanner) match(expected string) bool {
+	if s.isAtEnd() {
+		return false
+	}
+
+	if s.charAt(s.current) != expected {
+		return false
+	}
+
+	s.current++
+	return true
 }
