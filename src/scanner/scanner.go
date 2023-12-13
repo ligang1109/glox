@@ -59,6 +59,11 @@ func (s *Scanner) isAtEnd() bool {
 	return s.current >= len(s.source)
 }
 
+func (s *Scanner) error(msg string) {
+	s.hasError = true
+	log.Logger.Error(fmt.Sprintf("line %d error: %s", s.line, msg))
+}
+
 func (s *Scanner) scanToken() {
 	c := s.advance()
 	switch c {
@@ -106,9 +111,23 @@ func (s *Scanner) scanToken() {
 		} else {
 			s.addToken(token.Greater, nil)
 		}
+	case "/":
+		if s.match("/") {
+			for {
+				if s.peek() != "\n" && !s.isAtEnd() {
+					s.advance()
+				} else {
+					break
+				}
+			}
+		} else {
+			s.addToken(token.Slash, nil)
+		}
+	case " ", "\r", "\t":
+	case "\n":
+		s.line++
 	default:
-		s.hasError = true
-		log.Logger.Error(fmt.Sprintf("line %d error: Unexpected character.", s.line))
+		s.error("Unexpected character.")
 	}
 }
 
@@ -126,7 +145,7 @@ func (s *Scanner) charAt(pos int) string {
 func (s *Scanner) addToken(tokenType token.Type, literal any) {
 	s.tokens = append(s.tokens, &token.Token{
 		TokenType: tokenType,
-		Lexeme:    s.source[s.start : s.current+1],
+		Lexeme:    s.source[s.start:s.current],
 		Literal:   literal,
 		Line:      s.line,
 	})
@@ -143,4 +162,36 @@ func (s *Scanner) match(expected string) bool {
 
 	s.current++
 	return true
+}
+
+func (s *Scanner) peek() string {
+	if s.isAtEnd() {
+		return ""
+	}
+
+	return s.charAt(s.current)
+}
+
+func (s *Scanner) string() {
+	for {
+		c := s.peek()
+		if c != `"` && !s.isAtEnd() {
+			if c == "\n" {
+				s.line++
+			}
+			s.advance()
+		} else {
+			break
+		}
+	}
+
+	if s.isAtEnd() {
+		log.Logger.Error("Unterminated string.")
+		return
+	}
+
+	// The closing "
+	s.advance()
+
+	s.addToken(token.String, s.source[s.start+1:s.current-1])
 }
