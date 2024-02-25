@@ -126,6 +126,8 @@ func (s *Scanner) scanToken() {
 	case " ", "\r", "\t":
 	case "\n":
 		s.line++
+	case `"`:
+		s.string()
 	default:
 		s.error("Unexpected character.")
 	}
@@ -186,7 +188,7 @@ func (s *Scanner) string() {
 	}
 
 	if s.isAtEnd() {
-		log.Logger.Error("Unterminated string.")
+		s.error("Unterminated string.")
 		return
 	}
 
