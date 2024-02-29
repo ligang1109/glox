@@ -2,6 +2,7 @@ package scanner
 
 import (
 	"fmt"
+	"strconv"
 
 	"glox/log"
 	"glox/token"
@@ -56,7 +57,11 @@ func (s *Scanner) init(source string) {
 }
 
 func (s *Scanner) isAtEnd() bool {
-	return s.current >= len(s.source)
+	return s.posIsAtEnd(s.current)
+}
+
+func (s *Scanner) posIsAtEnd(pos int) bool {
+	return pos >= len(s.source)
 }
 
 func (s *Scanner) error(msg string) {
@@ -129,7 +134,11 @@ func (s *Scanner) scanToken() {
 	case `"`:
 		s.string()
 	default:
-		s.error("Unexpected character.")
+		if s.isDigit(c) {
+			s.number()
+		} else {
+			s.error("Unexpected character.")
+		}
 	}
 }
 
@@ -153,6 +162,7 @@ func (s *Scanner) addToken(tokenType token.Type, literal any) {
 	})
 }
 
+
 func (s *Scanner) match(expected string) bool {
 	if s.isAtEnd() {
 		return false
@@ -172,6 +182,15 @@ func (s *Scanner) peek() string {
 	}
 
 	return s.charAt(s.current)
+}
+
+func (s *Scanner) peekNext() string {
+	pos := s.current + 1
+	if s.posIsAtEnd(pos) {
+		return ""
+	}
+
+	return s.charAt(pos)
 }
 
 func (s *Scanner) string() {
@@ -196,4 +215,34 @@ func (s *Scanner) string() {
 	s.advance()
 
 	s.addToken(token.String, s.source[s.start+1:s.current-1])
+}
+
+func (s *Scanner) isDigit(c string) bool {
+	return c >= "0" && c <= "9"
+}
+
+func (s *Scanner) number() {
+	for {
+		if !s.isDigit(s.peek()) {
+			break
+		}
+		s.advance()
+	}
+
+	if s.peek() == "." && s.isDigit(s.peekNext()) {
+		s.advance()
+		for {
+			if !s.isDigit(s.peek()) {
+				break
+			}
+			s.advance()
+		}
+	}
+
+	v, err := strconv.ParseFloat(s.source[s.start:s.current], 64)
+	if err != nil {
+		s.error(fmt.Sprintf("strconv.ParseFloat error: %s", err))
+	} else {
+		s.addToken(token.Number, v)
+	}
 }
