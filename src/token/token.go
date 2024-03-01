@@ -32,8 +32,8 @@ const (
 	Number     Type = "NUMBER"
 
 	// Keywords.
-	And Type = "AND"
-
+	And    Type = "AND"
+	Class  Type = "CLASS"
 	Else   Type = "ELSE"
 	False  Type = "FALSE"
 	Fun    Type = "FUN"
@@ -51,6 +51,13 @@ const (
 
 	Eof Type = "EOF"
 )
+
+var keywordMap = map[string]Type{
+	"and":   And,
+	"class": Class,
+	"else":  Else,
+	"false": False,
+}
 
 type Token struct {
 	TokenType Type

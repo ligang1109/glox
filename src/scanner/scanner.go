@@ -136,6 +136,8 @@ func (s *Scanner) scanToken() {
 	default:
 		if s.isDigit(c) {
 			s.number()
+		} else if s.isAlpha(c) {
+			s.identifier()
 		} else {
 			s.error("Unexpected character.")
 		}
@@ -161,7 +163,6 @@ func (s *Scanner) addToken(tokenType token.Type, literal any) {
 		Line:      s.line,
 	})
 }
-
 
 func (s *Scanner) match(expected string) bool {
 	if s.isAtEnd() {
@@ -245,4 +246,22 @@ func (s *Scanner) number() {
 	} else {
 		s.addToken(token.Number, v)
 	}
+}
+
+func (s *Scanner) isAlpha(c string) bool {
+	return (c >= "a" && c <= "z") ||
+		(c >= "A" && c <= "Z") ||
+		(c == "_")
+}
+
+func (s *Scanner) identifier() {
+	for {
+		c := s.peek()
+		if !s.isAlpha(c) && !s.isDigit(c) {
+			break
+		}
+		s.advance()
+	}
+
+	text := s.source[s.start:s.current]
 }
