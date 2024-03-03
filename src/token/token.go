@@ -52,13 +52,6 @@ const (
 	Eof Type = "EOF"
 )
 
-var keywordMap = map[string]Type{
-	"and":   And,
-	"class": Class,
-	"else":  Else,
-	"false": False,
-}
-
 type Token struct {
 	TokenType Type
 	Lexeme    string

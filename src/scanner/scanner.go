@@ -264,4 +264,10 @@ func (s *Scanner) identifier() {
 	}
 
 	text := s.source[s.start:s.current]
+	tokenType, ok := keywordTokenMap[text]
+	if !ok {
+		tokenType = token.Identifier
+	}
+
+	s.addToken(tokenType, nil)
 }
