@@ -3,6 +3,8 @@ package scanner
 import (
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // source from https://www.craftinginterpreters.com/the-lox-language.html
@@ -15,7 +17,7 @@ func TestScanHello(t *testing.T) {
 		`,
 	}
 
-	scanSourceList(sourceList)
+	scanSourceList(t, sourceList)
 }
 
 func TestScanDataTypes(t *testing.T) {
@@ -35,7 +37,7 @@ func TestScanDataTypes(t *testing.T) {
 		`,
 	}
 
-	scanSourceList(sourceList)
+	scanSourceList(t, sourceList)
 }
 
 func TestScanExpressions(t *testing.T) {
@@ -82,7 +84,7 @@ func TestScanExpressions(t *testing.T) {
 		`,
 	}
 
-	scanSourceList(sourceList)
+	scanSourceList(t, sourceList)
 }
 
 func TestScanStatements(t *testing.T) {
@@ -101,7 +103,7 @@ func TestScanStatements(t *testing.T) {
 		`,
 	}
 
-	scanSourceList(sourceList)
+	scanSourceList(t, sourceList)
 }
 
 func TestScanVariables(t *testing.T) {
@@ -118,7 +120,7 @@ func TestScanVariables(t *testing.T) {
 		`,
 	}
 
-	scanSourceList(sourceList)
+	scanSourceList(t, sourceList)
 }
 
 func TestScanControlFlow(t *testing.T) {
@@ -144,20 +146,155 @@ func TestScanControlFlow(t *testing.T) {
 		`,
 	}
 
-	scanSourceList(sourceList)
+	scanSourceList(t, sourceList)
 }
 
-func scanSourceList(sourceList []string) {
+func TestScanFunctions(t *testing.T) {
+	sourceList := []string{
+		`
+		makeBreakfast(bacon, eggs, toast);
+		`,
+		`
+		makeBreakfast();
+		`,
+		`
+		fun printSum(a, b) {
+			print a + b;
+		}
+		`,
+		`
+		fun returnSum(a, b) {
+			return a + b;
+		}
+		`,
+		`
+		fun addPair(a, b) {
+			return a + b;
+		}
+		  
+		fun identity(a) {
+			return a;
+		}
+		
+		print identity(addPair)(1, 2); // Prints "3".	
+		`,
+		`
+		fun outerFunction() {
+			fun localFunction() {
+			  print "I'm local!";
+			}
+		  
+			localFunction();
+		}
+		`,
+		`
+		fun returnFunction() {
+			var outside = "outside";
+		  
+			fun inner() {
+			  print outside;
+			}
+		  
+			return inner;
+		}
+		  
+		var fn = returnFunction();
+		fn();
+		`,
+	}
+
+	scanSourceList(t, sourceList)
+}
+
+func TestScanClasses(t *testing.T) {
+	sourceList := []string{
+		`
+		class Breakfast {
+			cook() {
+			  print "Eggs a-fryin'!";
+			}
+		  
+			serve(who) {
+			  print "Enjoy your breakfast, " + who + ".";
+			}
+		}
+		`,
+		`
+		// Store it in variables.
+		var someVariable = Breakfast;
+
+		// Pass it to functions.
+		someFunction(Breakfast);
+		`,
+		`
+		var breakfast = Breakfast();
+		print breakfast; // "Breakfast instance".
+		`,
+		`
+		breakfast.meat = "sausage";
+		breakfast.bread = "sourdough";
+		`,
+		`
+		class Breakfast {
+			serve(who) {
+			  print "Enjoy your " + this.meat + " and " +
+				  this.bread + ", " + who + ".";
+			}
+		  
+			// ...
+		}
+		`,
+		`
+		class Breakfast {
+			init(meat, bread) {
+			  this.meat = meat;
+			  this.bread = bread;
+			}
+		  
+			// ...
+		}
+		  
+		var baconAndToast = Breakfast("bacon", "toast");
+		baconAndToast.serve("Dear Reader");
+		// "Enjoy your bacon and toast, Dear Reader."
+		`,
+		`
+		class Brunch < Breakfast {
+			drink() {
+			  print "How about a Bloody Mary?";
+			}
+		}
+		`,
+		`
+		var benedict = Brunch("ham", "English muffin");
+		benedict.serve("Noble Reader");
+		`,
+		`
+		class Brunch < Breakfast {
+			init(meat, bread, drink) {
+			  super.init(meat, bread);
+			  this.drink = drink;
+			}
+		}
+		`,
+	}
+
+	scanSourceList(t, sourceList)
+}
+
+func scanSourceList(t *testing.T, sourceList []string) {
 	for i, source := range sourceList {
 		fmt.Println("source", i, source)
-		scanSource(source)
+		scanSource(t, source)
 	}
 }
 
-func scanSource(source string) {
+func scanSource(t *testing.T, source string) {
 	scanner := &Scanner{}
 	tokens := scanner.ScanTokens(source)
 	for i, token := range tokens {
 		fmt.Println(i, token)
 	}
+
+	assert.False(t, scanner.HasError())
 }
