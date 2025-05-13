@@ -32,10 +32,10 @@ func (s *Scanner) ScanTokens(source string) []*token.Token {
 	}
 
 	s.tokens = append(s.tokens, &token.Token{
-		TokenType: token.Eof,
-		Lexeme:    "",
-		Literal:   nil,
-		Line:      s.line,
+		Type:    token.Eof,
+		Lexeme:  "",
+		Literal: nil,
+		Line:    s.line,
 	})
 
 	return s.tokens
@@ -157,10 +157,10 @@ func (s *Scanner) charAt(pos int) string {
 
 func (s *Scanner) addToken(tokenType token.Type, literal any) {
 	s.tokens = append(s.tokens, &token.Token{
-		TokenType: tokenType,
-		Lexeme:    s.source[s.start:s.current],
-		Literal:   literal,
-		Line:      s.line,
+		Type:    tokenType,
+		Lexeme:  s.source[s.start:s.current],
+		Literal: literal,
+		Line:    s.line,
 	})
 }
 

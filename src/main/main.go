@@ -44,11 +44,11 @@ func runFile(path string) error {
 }
 
 func runPrompt() error {
-	fmt.Print("> ")
+	printPrompt()
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		run(scanner.Text())
-		fmt.Print("> ")
+		printPrompt()
 	}
 
 	err := scanner.Err()
@@ -57,6 +57,10 @@ func runPrompt() error {
 	}
 
 	return nil
+}
+
+func printPrompt() {
+	fmt.Print("> ")
 }
 
 func run(source string) {

@@ -53,8 +53,8 @@ const (
 )
 
 type Token struct {
-	TokenType Type
-	Lexeme    string
-	Literal   any
-	Line      int
+	Type    Type
+	Lexeme  string
+	Literal any
+	Line    int
 }
