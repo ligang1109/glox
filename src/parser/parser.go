@@ -57,19 +57,32 @@ func (p *Parser) primary() expr.Expr {
 
 }
 
-func (p *Parser) match(tokenTypes ...token.Type) {
+func (p *Parser) match(tokenTypes ...token.Type) bool {
+	for _, tt := range tokenTypes {
+		if p.check(tt) {
+			p.advance()
+			return true
+		}
+	}
 
+	return false
 }
 
-func (p *Parser) check(tokenType token.Type) {
+func (p *Parser) check(tokenType token.Type) bool {
+	token := p.peek()
+	if token == nil {
+		return false
+	}
+
+	return token.Type == tokenType
 }
 
 func (p *Parser) isAtEnd() bool {
-	return p.posIsAtEnd(p.current)
-}
+	if p.current >= len(p.tokens)-1 {
+		return true
+	}
 
-func (p *Parser) posIsAtEnd(pos int) bool {
-	return pos >= len(p.tokens)
+	return false
 }
 
 func (p *Parser) peek() *token.Token {
@@ -82,6 +95,10 @@ func (p *Parser) peek() *token.Token {
 
 func (p *Parser) advance() *token.Token {
 	token := p.peek()
+	if token == nil {
+		return nil
+	}
+
 	p.current++
 
 	return token
