@@ -26,15 +26,42 @@ func (p *Parser) expression() expr.Expr {
 
 // equality -> comparison ( ( "!=" | "==" ) comparison )*
 func (p *Parser) equality() expr.Expr {
-	expr := p.comparison()
+	ep := p.comparison()
 	for {
-
+		if p.match(token.BangEqual, token.EqualEqual) {
+			operator := p.previous()
+			right := p.comparison()
+			ep = &expr.Binary{
+				Left:     ep,
+				Right:    right,
+				Operator: operator,
+			}
+		} else {
+			break
+		}
 	}
+
+	return ep
 }
 
 // comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )*
 func (p *Parser) comparison() expr.Expr {
+	ep := p.term()
+	for {
+		if p.match(token.Greater, token.GreaterEqual, token.Less, token.LessEqual) {
+			operator := p.previous()
+			right := p.term()
+			ep = &expr.Binary{
+				Left:     ep,
+				Right:    right,
+				Operator: operator,
+			}
+		} else {
+			break
+		}
+	}
 
+	return ep
 }
 
 // term -> factor ( ( "-" | "+" ) factor )*
@@ -102,4 +129,8 @@ func (p *Parser) advance() *token.Token {
 	p.current++
 
 	return token
+}
+
+func (p *Parser) previous() *token.Token {
+	return p.tokens[(p.current - 1)]
 }
