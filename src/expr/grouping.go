@@ -7,3 +7,7 @@ type Grouping struct {
 func (g *Grouping) Name() string {
 	return "Grouping"
 }
+
+func (g *Grouping) Accept(visitor ExprVisitor) {
+	visitor.VisitGrouping(g)
+}

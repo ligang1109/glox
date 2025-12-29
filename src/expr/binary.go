@@ -11,3 +11,7 @@ type Binary struct {
 func (b *Binary) Name() string {
 	return "Binary"
 }
+
+func (b *Binary) Accept(visitor ExprVisitor) {
+	visitor.VisitBinary(b)
+}

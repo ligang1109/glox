@@ -7,3 +7,7 @@ type Literal struct {
 func (l *Literal) Name() string {
 	return "Literal"
 }
+
+func (l *Literal) Accept(visitor ExprVisitor) {
+	visitor.VisitLiteral(l)
+}
