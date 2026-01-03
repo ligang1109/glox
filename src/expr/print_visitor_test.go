@@ -6,7 +6,7 @@ import (
 )
 
 func TestPrintVisitor(t *testing.T) {
-	// (3+4)*5
+	// (3+4)*-5
 	binary := &Binary{
 		Left: &Grouping{
 			Expression: &Binary{
