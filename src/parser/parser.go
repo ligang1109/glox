@@ -11,7 +11,7 @@ type Parser struct {
 	current int
 }
 
-func (p *Parser) ParseTokens(tokens []*token.Token) {
+func (p *Parser) Parse(tokens []*token.Token) {
 	p.init(tokens)
 }
 
@@ -140,10 +140,12 @@ func (p *Parser) primary() expr.Expr {
 				Expression: exp,
 			}
 		}
-		panic(perror.NewParseError(p.peek(), "Expect ')' after expression."))
+		p.error("Expect ')' after expression.")
 	}
 
-	panic(perror.NewParseError(p.peek(), "Unexpected token."))
+	p.error("Unexpected token.")
+
+	return nil
 }
 
 func (p *Parser) match(tokenTypes ...token.Type) bool {
@@ -195,4 +197,8 @@ func (p *Parser) advance() *token.Token {
 
 func (p *Parser) previous() *token.Token {
 	return p.tokens[(p.current - 1)]
+}
+
+func (p *Parser) error(message string) {
+	panic(perror.NewParseError(p.peek(), message))
 }

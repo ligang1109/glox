@@ -19,7 +19,7 @@ type Scanner struct {
 	hasError bool
 }
 
-func (s *Scanner) ScanTokens(source string) []*token.Token {
+func (s *Scanner) Scan(source string) []*token.Token {
 	s.init(source)
 
 	for {

@@ -291,7 +291,7 @@ func scanSourceList(t *testing.T, sourceList []string) {
 
 func scanSource(t *testing.T, source string) {
 	scanner := &Scanner{}
-	tokens := scanner.ScanTokens(source)
+	tokens := scanner.Scan(source)
 	for i, token := range tokens {
 		fmt.Println(i, token)
 	}
