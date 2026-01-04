@@ -2,6 +2,7 @@ package parser
 
 import (
 	"glox/expr"
+	"glox/perror"
 	"glox/token"
 )
 
@@ -26,62 +27,123 @@ func (p *Parser) expression() expr.Expr {
 
 // equality -> comparison ( ( "!=" | "==" ) comparison )*
 func (p *Parser) equality() expr.Expr {
-	ep := p.comparison()
+	exp := p.comparison()
 	for {
 		if p.match(token.BangEqual, token.EqualEqual) {
-			operator := p.previous()
-			right := p.comparison()
-			ep = &expr.Binary{
-				Left:     ep,
-				Right:    right,
-				Operator: operator,
+			exp = &expr.Binary{
+				Left:     exp,
+				Right:    p.comparison(),
+				Operator: p.previous(),
 			}
 		} else {
 			break
 		}
 	}
 
-	return ep
+	return exp
 }
 
 // comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )*
 func (p *Parser) comparison() expr.Expr {
-	ep := p.term()
+	exp := p.term()
 	for {
 		if p.match(token.Greater, token.GreaterEqual, token.Less, token.LessEqual) {
-			operator := p.previous()
-			right := p.term()
-			ep = &expr.Binary{
-				Left:     ep,
-				Right:    right,
-				Operator: operator,
+			exp = &expr.Binary{
+				Left:     exp,
+				Right:    p.term(),
+				Operator: p.previous(),
 			}
 		} else {
 			break
 		}
 	}
 
-	return ep
+	return exp
 }
 
 // term -> factor ( ( "-" | "+" ) factor )*
 func (p *Parser) term() expr.Expr {
+	exp := p.factor()
+	for {
+		if p.match(token.Minus, token.Plus) {
+			exp = &expr.Binary{
+				Left:     exp,
+				Right:    p.factor(),
+				Operator: p.previous(),
+			}
+		} else {
+			break
+		}
+	}
 
+	return exp
 }
 
 // factor -> unary ( ( "/" | "*" ) unary )*
 func (p *Parser) factor() expr.Expr {
+	exp := p.unary()
+	for {
+		if p.match(token.Slash, token.Star) {
+			exp = &expr.Binary{
+				Left:     exp,
+				Right:    p.unary(),
+				Operator: p.previous(),
+			}
+		} else {
+			break
+		}
+	}
 
+	return exp
 }
 
 // unary -> ( "!" | "-" ) unary | primary
 func (p *Parser) unary() expr.Expr {
+	if p.match(token.Bang, token.Minus) {
+		return &expr.Unary{
+			Right:    p.unary(),
+			Operator: p.previous(),
+		}
+	}
 
+	return p.primary()
 }
 
 // primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
 func (p *Parser) primary() expr.Expr {
+	if p.match(token.Number, token.String) {
+		return &expr.Literal{
+			Value: p.previous().Literal,
+		}
+	}
 
+	if p.match(token.True) {
+		return &expr.Literal{
+			Value: true,
+		}
+	}
+	if p.match(token.False) {
+		return &expr.Literal{
+			Value: false,
+		}
+	}
+	if p.match(token.Nil) {
+		return &expr.Literal{
+			Value: nil,
+		}
+	}
+
+	if p.match(token.LeftParen) {
+		exp := p.expression()
+		if p.match(token.RightParen) {
+			return &expr.Grouping{
+				Expression: exp,
+			}
+		}
+		panic(perror.NewParseError(p.peek(), "Expect ')' after expression."))
+	}
+
+	panic(perror.NewParseError(p.peek(), "Unexpected token."))
 }
 
 func (p *Parser) match(tokenTypes ...token.Type) bool {
