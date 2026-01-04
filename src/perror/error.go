@@ -1,6 +1,9 @@
 package perror
 
-import "glox/token"
+import (
+	"fmt"
+	"glox/token"
+)
 
 type ParseError struct {
 	token   *token.Token
@@ -12,4 +15,15 @@ func NewParseError(token *token.Token, message string) *ParseError {
 		token:   token,
 		message: message,
 	}
+}
+
+func (e *ParseError) Error() string {
+	var pos string
+	if e.token.Type == token.Eof {
+		pos = "end"
+	} else {
+		pos = fmt.Sprintf("'%s'", e.token.Lexeme)
+	}
+
+	return fmt.Sprintf("line %d at %s, %s", e.token.Line, pos, e.message)
 }

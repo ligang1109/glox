@@ -11,8 +11,16 @@ type Parser struct {
 	current int
 }
 
-func (p *Parser) Parse(tokens []*token.Token) {
+func (p *Parser) Parse(tokens []*token.Token) (exp expr.Expr, err *perror.ParseError) {
 	p.init(tokens)
+
+	defer func() {
+		if v := recover(); v != nil {
+			err = v.(*perror.ParseError)
+		}
+	}()
+
+	return p.expression(), nil
 }
 
 func (p *Parser) init(tokens []*token.Token) {
@@ -30,10 +38,12 @@ func (p *Parser) equality() expr.Expr {
 	exp := p.comparison()
 	for {
 		if p.match(token.BangEqual, token.EqualEqual) {
+			operator := p.previous()
+			right := p.comparison()
 			exp = &expr.Binary{
 				Left:     exp,
-				Right:    p.comparison(),
-				Operator: p.previous(),
+				Right:    right,
+				Operator: operator,
 			}
 		} else {
 			break
@@ -48,10 +58,12 @@ func (p *Parser) comparison() expr.Expr {
 	exp := p.term()
 	for {
 		if p.match(token.Greater, token.GreaterEqual, token.Less, token.LessEqual) {
+			operator := p.previous()
+			right := p.term()
 			exp = &expr.Binary{
 				Left:     exp,
-				Right:    p.term(),
-				Operator: p.previous(),
+				Right:    right,
+				Operator: operator,
 			}
 		} else {
 			break
@@ -66,10 +78,12 @@ func (p *Parser) term() expr.Expr {
 	exp := p.factor()
 	for {
 		if p.match(token.Minus, token.Plus) {
+			operator := p.previous()
+			right := p.factor()
 			exp = &expr.Binary{
 				Left:     exp,
-				Right:    p.factor(),
-				Operator: p.previous(),
+				Right:    right,
+				Operator: operator,
 			}
 		} else {
 			break
@@ -84,10 +98,12 @@ func (p *Parser) factor() expr.Expr {
 	exp := p.unary()
 	for {
 		if p.match(token.Slash, token.Star) {
+			operator := p.previous()
+			right := p.unary()
 			exp = &expr.Binary{
 				Left:     exp,
-				Right:    p.unary(),
-				Operator: p.previous(),
+				Right:    right,
+				Operator: operator,
 			}
 		} else {
 			break
@@ -100,9 +116,11 @@ func (p *Parser) factor() expr.Expr {
 // unary -> ( "!" | "-" ) unary | primary
 func (p *Parser) unary() expr.Expr {
 	if p.match(token.Bang, token.Minus) {
+		operator := p.previous()
+		right := p.unary()
 		return &expr.Unary{
-			Right:    p.unary(),
-			Operator: p.previous(),
+			Right:    right,
+			Operator: operator,
 		}
 	}
 
@@ -201,4 +219,25 @@ func (p *Parser) previous() *token.Token {
 
 func (p *Parser) error(message string) {
 	panic(perror.NewParseError(p.peek(), message))
+}
+
+func (p *Parser) synchronize() {
+	previous := p.advance()
+	if previous == nil || previous.Type == token.Semicolon {
+		return
+	}
+
+	for {
+		current := p.peek()
+		if current == nil {
+			return
+		}
+
+		switch current.Type {
+		case token.Semicolon, token.Class, token.Fun, token.Var, token.For, token.If, token.While, token.Print, token.Return:
+			return
+		}
+
+		p.advance()
+	}
 }
