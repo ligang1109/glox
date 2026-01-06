@@ -27,10 +27,10 @@ func parseSource(source string) {
 	content, _ := gomisc.PrettyJson(exp)
 	fmt.Println(string(content))
 
-	visitor := expr.NewPrintVisitor()
-	exp.Accept(visitor)
+	printer := expr.NewPrintVisitor()
+	exp.Accept(printer)
 
-	fmt.Println(visitor.Graph())
+	fmt.Println(printer.Graph())
 }
 
 func TestParser(t *testing.T) {
