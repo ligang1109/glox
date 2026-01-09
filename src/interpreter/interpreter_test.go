@@ -1,28 +1,33 @@
 package interpreter
 
 import (
+	"fmt"
 	"testing"
 
 	"glox/parser"
 	"glox/scanner"
 )
 
-func interpret(source string) any {
+func interpret(source string) {
 	scanner := &scanner.Scanner{}
 	tokens := scanner.Scan(source)
+	for i, token := range tokens {
+		fmt.Println(i, token)
+	}
 	parser := &parser.Parser{}
-	exp, _ := parser.Parse(tokens)
+	exp, err := parser.Parse(tokens)
+	if err != nil {
+		fmt.Println("parser.Parse error:", err)
+		return
+	}
 
-	interpreter := NewInterpreter()
-	exp.Accept(interpreter)
-
-	return interpreter.Value()
+	interpreter := &Interpreter{}
+	interpreter.Interpret(exp)
 }
 
 func TestInterpreter(t *testing.T) {
-	v := interpret(`
+	interpret(`
+		// 3-"abc";
 		(3+4) * -5;
 		`)
-
-	t.Log(v)
 }
