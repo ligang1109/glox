@@ -3,8 +3,8 @@ package expr
 import "glox/token"
 
 type Binary struct {
-	Left     Expr
-	Right    Expr
+	Left     Expression
+	Right    Expression
 	Operator *token.Token
 }
 
@@ -12,6 +12,6 @@ func (b *Binary) Name() string {
 	return "Binary"
 }
 
-func (b *Binary) Accept(visitor ExprVisitor) {
+func (b *Binary) Accept(visitor ExpressionVisitor) {
 	visitor.VisitBinary(b)
 }

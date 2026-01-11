@@ -73,7 +73,7 @@ func (v *PrintVisitor) drawNode(node *printVisitorNode) {
 	}
 }
 
-func (v *PrintVisitor) drawChild(child *printVisitorNode, exp Expr) {
+func (v *PrintVisitor) drawChild(child *printVisitorNode, exp Expression) {
 	v.curNode = child
 	exp.Accept(v)
 	v.curNode = child.parent

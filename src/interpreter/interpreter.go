@@ -13,7 +13,7 @@ type Interpreter struct {
 	value any
 }
 
-func (p *Interpreter) Interpret(exp expr.Expr) {
+func (p *Interpreter) Interpret(exp expr.Expression) {
 	defer func() {
 		if v := recover(); v != nil {
 			err := v.(*perror.RuntimeError)
@@ -129,7 +129,7 @@ func (p *Interpreter) VisitUnary(unary *expr.Unary) {
 	p.error(unary.Operator, "Unreachable.")
 }
 
-func (p *Interpreter) evaluate(expr expr.Expr) {
+func (p *Interpreter) evaluate(expr expr.Expression) {
 	expr.Accept(p)
 }
 

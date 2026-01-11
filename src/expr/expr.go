@@ -1,11 +1,11 @@
 package expr
 
-type Expr interface {
+type Expression interface {
 	Name() string
-	Accept(visitor ExprVisitor)
+	Accept(visitor ExpressionVisitor)
 }
 
-type ExprVisitor interface {
+type ExpressionVisitor interface {
 	VisitBinary(binary *Binary)
 	VisitGrouping(grouping *Grouping)
 	VisitLiteral(literal *Literal)

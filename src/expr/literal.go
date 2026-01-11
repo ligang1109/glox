@@ -8,6 +8,6 @@ func (l *Literal) Name() string {
 	return "Literal"
 }
 
-func (l *Literal) Accept(visitor ExprVisitor) {
+func (l *Literal) Accept(visitor ExpressionVisitor) {
 	visitor.VisitLiteral(l)
 }

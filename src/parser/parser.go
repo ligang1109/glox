@@ -11,7 +11,7 @@ type Parser struct {
 	current int
 }
 
-func (p *Parser) Parse(tokens []*token.Token) (exp expr.Expr, err *perror.ParseError) {
+func (p *Parser) Parse(tokens []*token.Token) (exp expr.Expression, err *perror.ParseError) {
 	p.init(tokens)
 
 	defer func() {
@@ -29,12 +29,12 @@ func (p *Parser) init(tokens []*token.Token) {
 }
 
 // expression -> equality
-func (p *Parser) expression() expr.Expr {
+func (p *Parser) expression() expr.Expression {
 	return p.equality()
 }
 
 // equality -> comparison ( ( "!=" | "==" ) comparison )*
-func (p *Parser) equality() expr.Expr {
+func (p *Parser) equality() expr.Expression {
 	exp := p.comparison()
 	for {
 		if p.match(token.BangEqual, token.EqualEqual) {
@@ -54,7 +54,7 @@ func (p *Parser) equality() expr.Expr {
 }
 
 // comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )*
-func (p *Parser) comparison() expr.Expr {
+func (p *Parser) comparison() expr.Expression {
 	exp := p.term()
 	for {
 		if p.match(token.Greater, token.GreaterEqual, token.Less, token.LessEqual) {
@@ -74,7 +74,7 @@ func (p *Parser) comparison() expr.Expr {
 }
 
 // term -> factor ( ( "-" | "+" ) factor )*
-func (p *Parser) term() expr.Expr {
+func (p *Parser) term() expr.Expression {
 	exp := p.factor()
 	for {
 		if p.match(token.Minus, token.Plus) {
@@ -94,7 +94,7 @@ func (p *Parser) term() expr.Expr {
 }
 
 // factor -> unary ( ( "/" | "*" ) unary )*
-func (p *Parser) factor() expr.Expr {
+func (p *Parser) factor() expr.Expression {
 	exp := p.unary()
 	for {
 		if p.match(token.Slash, token.Star) {
@@ -114,7 +114,7 @@ func (p *Parser) factor() expr.Expr {
 }
 
 // unary -> ( "!" | "-" ) unary | primary
-func (p *Parser) unary() expr.Expr {
+func (p *Parser) unary() expr.Expression {
 	if p.match(token.Bang, token.Minus) {
 		operator := p.previous()
 		right := p.unary()
@@ -128,7 +128,7 @@ func (p *Parser) unary() expr.Expr {
 }
 
 // primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
-func (p *Parser) primary() expr.Expr {
+func (p *Parser) primary() expr.Expression {
 	if p.match(token.Number, token.String) {
 		return &expr.Literal{
 			Value: p.previous().Literal,
