@@ -1,8 +1,9 @@
 package expr
 
 import (
-	"glox/token"
 	"testing"
+
+	"glox/token"
 )
 
 func TestPrintVisitor(t *testing.T) {
