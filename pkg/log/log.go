@@ -29,7 +29,6 @@ func (c consoleWriter) Flush() error {
 }
 
 func (c consoleWriter) Free() {
-	return
 }
 
 var filterLogFieldKeyMap = map[string]bool{

@@ -1,9 +1,8 @@
-module glox
+module github.com/ligang1109/glox
 
 go 1.24.10
 
 require (
-	github.com/goinbox/ds v1.0.1
 	github.com/goinbox/golog v4.2.3+incompatible
 	github.com/goinbox/gomisc v1.4.0
 	github.com/stretchr/testify v1.11.1

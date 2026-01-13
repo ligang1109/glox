@@ -3,7 +3,7 @@ package perror
 import (
 	"fmt"
 
-	"glox/token"
+	"github.com/ligang1109/glox/pkg/token"
 )
 
 type tokenError struct {

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"glox/expr"
-	"glox/scanner"
-
 	"github.com/goinbox/gomisc"
+
+	"github.com/ligang1109/glox/internal/expr"
+	"github.com/ligang1109/glox/internal/scanner"
 )
 
 func parseSource(source string) {

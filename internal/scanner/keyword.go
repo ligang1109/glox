@@ -1,6 +1,6 @@
 package scanner
 
-import "glox/token"
+import "github.com/ligang1109/glox/pkg/token"
 
 var keywordTokenMap = map[string]token.Type{
 	"and":    token.And,

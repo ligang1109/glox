@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"glox/parser"
-	"glox/scanner"
+	"github.com/ligang1109/glox/internal/parser"
+	"github.com/ligang1109/glox/internal/scanner"
 )
 
 func interpret(source string) {

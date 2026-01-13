@@ -1,6 +1,6 @@
 package stmt
 
-import "glox/expr"
+import "github.com/ligang1109/glox/internal/expr"
 
 type Statement interface {
 	Name() string

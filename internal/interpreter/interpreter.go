@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"reflect"
 
-	"glox/expr"
-	"glox/perror"
-	"glox/token"
+	"github.com/ligang1109/glox/internal/expr"
+	"github.com/ligang1109/glox/internal/perror"
+	"github.com/ligang1109/glox/pkg/token"
 )
 
 type Interpreter struct {
