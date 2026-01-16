@@ -13,7 +13,7 @@ type StatementVisitor interface {
 }
 
 type Expression struct {
-	exp expr.Expression
+	Exp expr.Expression
 }
 
 func (e *Expression) Name() string {
@@ -25,7 +25,7 @@ func (e *Expression) Accept(visitor StatementVisitor) {
 }
 
 type Print struct {
-	exp expr.Expression
+	Exp expr.Expression
 }
 
 func (p *Print) Name() string {

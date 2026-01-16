@@ -3,6 +3,7 @@ package parser
 import (
 	"github.com/ligang1109/glox/internal/expr"
 	"github.com/ligang1109/glox/internal/perror"
+	"github.com/ligang1109/glox/internal/stmt"
 	"github.com/ligang1109/glox/pkg/token"
 )
 
@@ -11,7 +12,7 @@ type Parser struct {
 	current int
 }
 
-func (p *Parser) Parse(tokens []*token.Token) (exp expr.Expression, err *perror.ParseError) {
+func (p *Parser) Parse(tokens []*token.Token) (statementList []stmt.Statement, err *perror.ParseError) {
 	p.init(tokens)
 
 	defer func() {
@@ -20,7 +21,15 @@ func (p *Parser) Parse(tokens []*token.Token) (exp expr.Expression, err *perror.
 		}
 	}()
 
-	return p.expression(), nil
+	for {
+		if p.isAtEnd() {
+			break
+		}
+
+		statementList = append(statementList, p.statement())
+	}
+
+	return statementList, nil
 }
 
 func (p *Parser) init(tokens []*token.Token) {
@@ -28,12 +37,40 @@ func (p *Parser) init(tokens []*token.Token) {
 	p.current = 0
 }
 
-// expression -> equality
+func (p *Parser) statement() stmt.Statement {
+	if p.match(token.Print) {
+		return p.printStatement()
+	}
+
+	return p.expressionStatement()
+}
+
+func (p *Parser) printStatement() *stmt.Print {
+	exp := p.expression()
+	if !p.match(token.Semicolon) {
+		p.error("Expect ';' after value.")
+	}
+
+	return &stmt.Print{
+		Exp: exp,
+	}
+}
+
+func (p *Parser) expressionStatement() *stmt.Expression {
+	exp := p.expression()
+	if !p.match(token.Semicolon) {
+		p.error("Expect ';' after expression.")
+	}
+
+	return &stmt.Expression{
+		Exp: exp,
+	}
+}
+
 func (p *Parser) expression() expr.Expression {
 	return p.equality()
 }
 
-// equality -> comparison ( ( "!=" | "==" ) comparison )*
 func (p *Parser) equality() expr.Expression {
 	exp := p.comparison()
 	for {
@@ -53,7 +90,6 @@ func (p *Parser) equality() expr.Expression {
 	return exp
 }
 
-// comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )*
 func (p *Parser) comparison() expr.Expression {
 	exp := p.term()
 	for {
@@ -73,7 +109,6 @@ func (p *Parser) comparison() expr.Expression {
 	return exp
 }
 
-// term -> factor ( ( "-" | "+" ) factor )*
 func (p *Parser) term() expr.Expression {
 	exp := p.factor()
 	for {
@@ -93,7 +128,6 @@ func (p *Parser) term() expr.Expression {
 	return exp
 }
 
-// factor -> unary ( ( "/" | "*" ) unary )*
 func (p *Parser) factor() expr.Expression {
 	exp := p.unary()
 	for {
@@ -113,7 +147,6 @@ func (p *Parser) factor() expr.Expression {
 	return exp
 }
 
-// unary -> ( "!" | "-" ) unary | primary
 func (p *Parser) unary() expr.Expression {
 	if p.match(token.Bang, token.Minus) {
 		operator := p.previous()
@@ -127,7 +160,6 @@ func (p *Parser) unary() expr.Expression {
 	return p.primary()
 }
 
-// primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")"
 func (p *Parser) primary() expr.Expression {
 	if p.match(token.Number, token.String) {
 		return &expr.Literal{

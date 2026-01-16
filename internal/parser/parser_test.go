@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/goinbox/gomisc"
-
-	"github.com/ligang1109/glox/internal/expr"
 	"github.com/ligang1109/glox/internal/scanner"
+	"github.com/ligang1109/glox/internal/stmt"
 )
 
 func parseSource(source string) {
@@ -18,19 +16,18 @@ func parseSource(source string) {
 	}
 
 	parser := &Parser{}
-	exp, err := parser.Parse(tokens)
+	statementList, err := parser.Parse(tokens)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
-	content, _ := gomisc.PrettyJson(exp)
-	fmt.Println(string(content))
+	for i, statement := range statementList {
+		printer := &stmt.PrintVisitor{}
+		statement.Accept(printer)
 
-	printer := expr.NewPrintVisitor()
-	exp.Accept(printer)
-
-	fmt.Println(printer.Graph())
+		fmt.Println(i, printer.Graph())
+	}
 }
 
 func TestParser(t *testing.T) {
