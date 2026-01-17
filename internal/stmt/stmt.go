@@ -8,8 +8,8 @@ type Statement interface {
 }
 
 type StatementVisitor interface {
-	VisitExpression(exp *Expression)
-	VisitPrint(p *Print)
+	VisitExpressionStmt(exp *Expression)
+	VisitPrintStmt(p *Print)
 }
 
 type Expression struct {
@@ -21,7 +21,7 @@ func (e *Expression) Name() string {
 }
 
 func (e *Expression) Accept(visitor StatementVisitor) {
-	visitor.VisitExpression(e)
+	visitor.VisitExpressionStmt(e)
 }
 
 type Print struct {
@@ -33,5 +33,5 @@ func (p *Print) Name() string {
 }
 
 func (p *Print) Accept(visitor StatementVisitor) {
-	visitor.VisitPrint(p)
+	visitor.VisitPrintStmt(p)
 }

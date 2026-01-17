@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/ligang1109/glox/internal/expr"
 	"github.com/ligang1109/glox/internal/perror"
 	"github.com/ligang1109/glox/internal/stmt"
@@ -12,12 +14,16 @@ type Parser struct {
 	current int
 }
 
-func (p *Parser) Parse(tokens []*token.Token) (statementList []stmt.Statement, err *perror.ParseError) {
+func (p *Parser) Parse(tokens []*token.Token) (statementList []stmt.Statement, err error) {
 	p.init(tokens)
 
 	defer func() {
 		if v := recover(); v != nil {
-			err = v.(*perror.ParseError)
+			ok := false
+			err, ok = v.(*perror.ParseError)
+			if !ok {
+				err = fmt.Errorf("Parser.Parse recover from %v", v)
+			}
 		}
 	}()
 

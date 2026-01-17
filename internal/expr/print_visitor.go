@@ -87,7 +87,7 @@ func (v *PrintVisitor) Graph() string {
 	return graph
 }
 
-func (v *PrintVisitor) VisitBinary(binary *Binary) {
+func (v *PrintVisitor) VisitBinaryExpr(binary *Binary) {
 	node := v.curNode
 	if node == nil {
 		node = v.newNode(binary.Name(), nil)
@@ -104,7 +104,7 @@ func (v *PrintVisitor) VisitBinary(binary *Binary) {
 	v.drawChild(child, binary.Right)
 }
 
-func (v *PrintVisitor) VisitGrouping(grouping *Grouping) {
+func (v *PrintVisitor) VisitGroupingExpr(grouping *Grouping) {
 	text := grouping.Expression.Name()
 	child := v.curNode
 	if child == nil {
@@ -116,7 +116,7 @@ func (v *PrintVisitor) VisitGrouping(grouping *Grouping) {
 	v.drawChild(child, grouping.Expression)
 }
 
-func (v *PrintVisitor) VisitLiteral(literal *Literal) {
+func (v *PrintVisitor) VisitLiteralExpr(literal *Literal) {
 	text := fmt.Sprintf("%s %v", literal.Name(), literal.Value)
 	node := v.curNode
 	if node == nil {
@@ -128,7 +128,7 @@ func (v *PrintVisitor) VisitLiteral(literal *Literal) {
 	v.drawNode(node)
 }
 
-func (v *PrintVisitor) VisitUnary(unary *Unary) {
+func (v *PrintVisitor) VisitUnaryExpr(unary *Unary) {
 	node := v.curNode
 	if node == nil {
 		node = v.newNode(unary.Name(), nil)

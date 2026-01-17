@@ -6,6 +6,7 @@ import (
 
 	"github.com/ligang1109/glox/internal/expr"
 	"github.com/ligang1109/glox/internal/perror"
+	"github.com/ligang1109/glox/internal/stmt"
 	"github.com/ligang1109/glox/pkg/token"
 )
 
@@ -13,127 +14,132 @@ type Interpreter struct {
 	value any
 }
 
-func (p *Interpreter) Interpret(exp expr.Expression) {
+func (in *Interpreter) Interpret(statementList []stmt.Statement) (err error) {
 	defer func() {
 		if v := recover(); v != nil {
-			err := v.(*perror.RuntimeError)
-			if err != nil {
-				fmt.Println(err)
+			ok := false
+			err, ok = v.(*perror.RuntimeError)
+			if !ok {
+				err = fmt.Errorf("Interpreter.Interpret recover from %v", v)
 			}
 		}
 	}()
 
-	p.evaluate(exp)
-	fmt.Println(p.Value())
+	for _, statement := range statementList {
+		statement.Accept(in)
+		fmt.Println(in.Value())
+	}
+
+	return nil
 }
 
-func (p *Interpreter) Value() any {
-	return p.value
+func (in *Interpreter) Value() any {
+	return in.value
 }
 
-func (p *Interpreter) setValue(value any) {
-	p.value = value
+func (in *Interpreter) setValue(value any) {
+	in.value = value
 }
 
-func (p *Interpreter) VisitBinary(binary *expr.Binary) {
-	p.evaluate(binary.Left)
-	left := p.Value()
+func (in *Interpreter) VisitBinaryExpr(binary *expr.Binary) {
+	in.evaluate(binary.Left)
+	left := in.Value()
 
-	p.evaluate(binary.Right)
-	right := p.Value()
+	in.evaluate(binary.Right)
+	right := in.Value()
 
 	switch binary.Operator.Type {
 	case token.Minus:
-		values := p.checkNumberOperands(binary.Operator, left, right)
-		p.setValue(values[0] - values[1])
+		values := in.checkNumberOperands(binary.Operator, left, right)
+		in.setValue(values[0] - values[1])
 		return
 	case token.Slash:
-		values := p.checkNumberOperands(binary.Operator, left, right)
-		p.setValue(values[0] / values[1])
+		values := in.checkNumberOperands(binary.Operator, left, right)
+		in.setValue(values[0] / values[1])
 		return
 	case token.Star:
-		values := p.checkNumberOperands(binary.Operator, left, right)
-		p.setValue(values[0] * values[1])
+		values := in.checkNumberOperands(binary.Operator, left, right)
+		in.setValue(values[0] * values[1])
 		return
 	case token.Greater:
-		values := p.checkNumberOperands(binary.Operator, left, right)
-		p.setValue(values[0] > values[1])
+		values := in.checkNumberOperands(binary.Operator, left, right)
+		in.setValue(values[0] > values[1])
 		return
 	case token.GreaterEqual:
-		values := p.checkNumberOperands(binary.Operator, left, right)
-		p.setValue(values[0] >= values[1])
+		values := in.checkNumberOperands(binary.Operator, left, right)
+		in.setValue(values[0] >= values[1])
 		return
 	case token.Less:
-		values := p.checkNumberOperands(binary.Operator, left, right)
-		p.setValue(values[0] < values[1])
+		values := in.checkNumberOperands(binary.Operator, left, right)
+		in.setValue(values[0] < values[1])
 		return
 	case token.LessEqual:
-		values := p.checkNumberOperands(binary.Operator, left, right)
-		p.setValue(values[0] <= values[1])
+		values := in.checkNumberOperands(binary.Operator, left, right)
+		in.setValue(values[0] <= values[1])
 		return
 	case token.BangEqual:
-		p.setValue(!p.isEqual(left, right))
+		in.setValue(!in.isEqual(left, right))
 		return
 	case token.EqualEqual:
-		p.setValue(p.isEqual(left, right))
+		in.setValue(in.isEqual(left, right))
 		return
 	case token.Plus:
 		lv, ok := left.(float64)
 		if ok {
 			rv, ok := right.(float64)
 			if ok {
-				p.setValue(lv + rv)
+				in.setValue(lv + rv)
 				return
 			}
-			p.error(binary.Operator, "Right is not number.")
+			in.error(binary.Operator, "Right is not number.")
 		}
 
 		ls, ok := left.(string)
 		if ok {
 			rs, ok := right.(string)
 			if ok {
-				p.setValue(ls + rs)
+				in.setValue(ls + rs)
 				return
 			}
-			p.error(binary.Operator, "Right is not string.")
+			in.error(binary.Operator, "Right is not string.")
 		}
 
-		p.error(binary.Operator, "Operands must be two numbers or two strings.")
+		in.error(binary.Operator, "Operands must be two numbers or two strings.")
 	}
 
-	p.error(binary.Operator, "Unreachable.")
+	in.error(binary.Operator, "Unreachable.")
 }
 
-func (p *Interpreter) VisitGrouping(grouping *expr.Grouping) {
-	p.evaluate(grouping.Expression)
+func (in *Interpreter) VisitGroupingExpr(grouping *expr.Grouping) {
+	in.evaluate(grouping.Expression)
 }
 
-func (p *Interpreter) VisitLiteral(literal *expr.Literal) {
-	p.setValue(literal.Value)
+func (in *Interpreter) VisitLiteralExpr(literal *expr.Literal) {
+	in.setValue(literal.Value)
 }
 
-func (p *Interpreter) VisitUnary(unary *expr.Unary) {
-	p.evaluate(unary.Right)
+func (in *Interpreter) VisitUnaryExpr(unary *expr.Unary) {
+	in.evaluate(unary.Right)
 
 	switch unary.Operator.Type {
 	case token.Minus:
-		v := p.Value().(float64)
-		p.setValue(-v)
+		v := in.Value().(float64)
+		in.setValue(-v)
 		return
 	case token.Bang:
-		v := p.Value()
-		p.setValue(!p.isTruthy(v))
+		v := in.Value()
+		in.setValue(!in.isTruthy(v))
 		return
 	}
 
-	p.error(unary.Operator, "Unreachable.")
+	in.error(unary.Operator, "Unreachable.")
 }
 
-func (p *Interpreter) evaluate(expr expr.Expression) {
-	expr.Accept(p)
+func (in *Interpreter) evaluate(expr expr.Expression) {
+	expr.Accept(in)
 }
 
-func (p *Interpreter) isTruthy(value any) bool {
+func (in *Interpreter) isTruthy(value any) bool {
 	if value == nil {
 		return false
 	}
@@ -146,7 +152,7 @@ func (p *Interpreter) isTruthy(value any) bool {
 	return true
 }
 
-func (p *Interpreter) isEqual(v1, v2 any) bool {
+func (in *Interpreter) isEqual(v1, v2 any) bool {
 	if v1 == nil && v2 == nil {
 		return true
 	}
@@ -157,12 +163,12 @@ func (p *Interpreter) isEqual(v1, v2 any) bool {
 	return reflect.DeepEqual(v1, v2)
 }
 
-func (p *Interpreter) checkNumberOperands(operator *token.Token, values ...any) []float64 {
+func (in *Interpreter) checkNumberOperands(operator *token.Token, values ...any) []float64 {
 	result := make([]float64, len(values))
 	for i, value := range values {
 		v, ok := value.(float64)
 		if !ok {
-			p.error(operator, "Operands must be numbers.")
+			in.error(operator, "Operands must be numbers.")
 		}
 		result[i] = v
 	}
@@ -170,6 +176,15 @@ func (p *Interpreter) checkNumberOperands(operator *token.Token, values ...any) 
 	return result
 }
 
-func (p *Interpreter) error(token *token.Token, message string) {
+func (in *Interpreter) error(token *token.Token, message string) {
 	panic(perror.NewRuntimeError(token, message))
+}
+
+func (in *Interpreter) VisitExpressionStmt(exp *stmt.Expression) {
+	in.evaluate(exp.Exp)
+}
+
+func (in *Interpreter) VisitPrintStmt(p *stmt.Print) {
+	in.evaluate(p.Exp)
+	fmt.Println(in.Value())
 }

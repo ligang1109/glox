@@ -15,19 +15,24 @@ func interpret(source string) {
 		fmt.Println(i, token)
 	}
 	parser := &parser.Parser{}
-	exp, err := parser.Parse(tokens)
+	statementList, err := parser.Parse(tokens)
 	if err != nil {
 		fmt.Println("parser.Parse error:", err)
 		return
 	}
 
 	interpreter := &Interpreter{}
-	interpreter.Interpret(exp)
+	e := interpreter.Interpret(statementList)
+	if e != nil {
+		fmt.Println("interpreter.Interpret error:", e)
+		return
+	}
 }
 
 func TestInterpreter(t *testing.T) {
 	interpret(`
-		// 3-"abc";
+		3-1;
 		(3+4) * -5;
+		print true;
 		`)
 }

@@ -17,10 +17,10 @@ func (v *PrintVisitor) drawExpression(exp expr.Expression) {
 	v.graph = exprPrinter.Graph()
 }
 
-func (v *PrintVisitor) VisitExpression(exp *Expression) {
+func (v *PrintVisitor) VisitExpressionStmt(exp *Expression) {
 	v.drawExpression(exp.Exp)
 }
 
-func (v *PrintVisitor) VisitPrint(p *Print) {
+func (v *PrintVisitor) VisitPrintStmt(p *Print) {
 	v.drawExpression(p.Exp)
 }

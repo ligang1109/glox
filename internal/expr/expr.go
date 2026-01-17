@@ -8,10 +8,10 @@ type Expression interface {
 }
 
 type ExpressionVisitor interface {
-	VisitBinary(binary *Binary)
-	VisitGrouping(grouping *Grouping)
-	VisitLiteral(literal *Literal)
-	VisitUnary(unary *Unary)
+	VisitBinaryExpr(binary *Binary)
+	VisitGroupingExpr(grouping *Grouping)
+	VisitLiteralExpr(literal *Literal)
+	VisitUnaryExpr(unary *Unary)
 }
 
 type Binary struct {
@@ -25,7 +25,7 @@ func (b *Binary) Name() string {
 }
 
 func (b *Binary) Accept(visitor ExpressionVisitor) {
-	visitor.VisitBinary(b)
+	visitor.VisitBinaryExpr(b)
 }
 
 type Grouping struct {
@@ -37,7 +37,7 @@ func (g *Grouping) Name() string {
 }
 
 func (g *Grouping) Accept(visitor ExpressionVisitor) {
-	visitor.VisitGrouping(g)
+	visitor.VisitGroupingExpr(g)
 }
 
 type Literal struct {
@@ -49,7 +49,7 @@ func (l *Literal) Name() string {
 }
 
 func (l *Literal) Accept(visitor ExpressionVisitor) {
-	visitor.VisitLiteral(l)
+	visitor.VisitLiteralExpr(l)
 }
 
 type Unary struct {
@@ -62,5 +62,5 @@ func (u *Unary) Name() string {
 }
 
 func (u *Unary) Accept(visitor ExpressionVisitor) {
-	visitor.VisitUnary(u)
+	visitor.VisitUnaryExpr(u)
 }
