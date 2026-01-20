@@ -6,17 +6,50 @@ import (
 	"github.com/ligang1109/glox/internal/expr"
 	"github.com/ligang1109/glox/internal/perror"
 	"github.com/ligang1109/glox/internal/stmt"
+	"github.com/ligang1109/glox/pkg/log"
 	"github.com/ligang1109/glox/pkg/token"
 )
 
 type Parser struct {
 	tokens  []*token.Token
 	current int
+
+	hasError bool
 }
 
-func (p *Parser) Parse(tokens []*token.Token) (statementList []stmt.Statement, err error) {
+func (p *Parser) HasError() bool {
+	return p.hasError
+}
+
+func (p *Parser) Parse(tokens []*token.Token) []stmt.Statement {
 	p.init(tokens)
 
+	var statementList []stmt.Statement
+	for {
+		if p.isAtEnd() {
+			break
+		}
+
+		statement, err := p.declaration()
+		if err != nil {
+			p.hasError = true
+			log.Logger.Error(err.Error())
+
+			p.synchronize()
+		} else {
+			statementList = append(statementList, statement)
+		}
+	}
+
+	return statementList
+}
+
+func (p *Parser) init(tokens []*token.Token) {
+	p.tokens = tokens
+	p.current = 0
+}
+
+func (p *Parser) declaration() (statement stmt.Statement, err error) {
 	defer func() {
 		if v := recover(); v != nil {
 			ok := false
@@ -27,20 +60,27 @@ func (p *Parser) Parse(tokens []*token.Token) (statementList []stmt.Statement, e
 		}
 	}()
 
-	for {
-		if p.isAtEnd() {
-			break
-		}
-
-		statementList = append(statementList, p.statement())
+	if p.match(token.Var) {
+		return p.varDeclaration(), nil
 	}
 
-	return statementList, nil
+	return p.statement(), nil
 }
 
-func (p *Parser) init(tokens []*token.Token) {
-	p.tokens = tokens
-	p.current = 0
+func (p *Parser) varDeclaration() *stmt.Var {
+	name := p.consume(token.Identifier, "Expect variable name.")
+
+	var initializer expr.Expression
+	if p.match(token.Equal) {
+		initializer = p.expression()
+	}
+
+	p.consume(token.Semicolon, "Expect ';' after variable declaration.")
+
+	return &stmt.Var{
+		Variable:    name,
+		Initializer: initializer,
+	}
 }
 
 func (p *Parser) statement() stmt.Statement {
@@ -53,9 +93,7 @@ func (p *Parser) statement() stmt.Statement {
 
 func (p *Parser) printStatement() *stmt.Print {
 	exp := p.expression()
-	if !p.match(token.Semicolon) {
-		p.error("Expect ';' after value.")
-	}
+	p.consume(token.Semicolon, "Expect ';' after value.")
 
 	return &stmt.Print{
 		Exp: exp,
@@ -64,9 +102,7 @@ func (p *Parser) printStatement() *stmt.Print {
 
 func (p *Parser) expressionStatement() *stmt.Expression {
 	exp := p.expression()
-	if !p.match(token.Semicolon) {
-		p.error("Expect ';' after expression.")
-	}
+	p.consume(token.Semicolon, "Expect ';' after expression.")
 
 	return &stmt.Expression{
 		Exp: exp,
@@ -191,12 +227,17 @@ func (p *Parser) primary() expr.Expression {
 
 	if p.match(token.LeftParen) {
 		exp := p.expression()
-		if p.match(token.RightParen) {
-			return &expr.Grouping{
-				Expression: exp,
-			}
+		p.consume(token.RightParen, "Expect ')' after expression.")
+
+		return &expr.Grouping{
+			Expression: exp,
 		}
-		p.error("Expect ')' after expression.")
+	}
+
+	if p.match(token.Identifier) {
+		return &expr.Variable{
+			VarName: p.previous(),
+		}
 	}
 
 	p.error("Unexpected token.")
@@ -253,6 +294,16 @@ func (p *Parser) advance() *token.Token {
 
 func (p *Parser) previous() *token.Token {
 	return p.tokens[(p.current - 1)]
+}
+
+func (p *Parser) consume(tokenType token.Type, message string) *token.Token {
+	if p.check(tokenType) {
+		return p.advance()
+	}
+
+	p.error(message)
+
+	return nil
 }
 
 func (p *Parser) error(message string) {

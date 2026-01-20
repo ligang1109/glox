@@ -16,9 +16,8 @@ func parseSource(source string) {
 	}
 
 	parser := &Parser{}
-	statementList, err := parser.Parse(tokens)
-	if err != nil {
-		fmt.Println(err.Error())
+	statementList := parser.Parse(tokens)
+	if parser.HasError() {
 		return
 	}
 
@@ -35,6 +34,9 @@ func TestParser(t *testing.T) {
 		`
 		(3+4) * -5;
 		1+2;
+		print true;
+		var a = 1;
+		var b;
 		`
 
 	parseSource(source)

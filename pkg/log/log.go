@@ -11,7 +11,7 @@ import (
 
 var Logger golog.Logger
 
-func Init() {
+func init() {
 	w := &consoleWriter{
 		Writer: os.Stderr,
 	}

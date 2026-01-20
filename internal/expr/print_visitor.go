@@ -141,3 +141,15 @@ func (v *PrintVisitor) VisitUnaryExpr(unary *Unary) {
 	child = v.newNode(unary.Right.Name(), node)
 	v.drawChild(child, unary.Right)
 }
+
+func (v *PrintVisitor) VisitVariableExpr(variable *Variable) {
+	text := fmt.Sprintf("%s %s", variable.Name(), variable.VarName.Lexeme)
+	node := v.curNode
+	if node == nil {
+		node = v.newNode(text, nil)
+	} else {
+		node.text = text
+	}
+
+	v.drawNode(node)
+}

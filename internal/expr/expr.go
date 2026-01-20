@@ -12,6 +12,7 @@ type ExpressionVisitor interface {
 	VisitGroupingExpr(grouping *Grouping)
 	VisitLiteralExpr(literal *Literal)
 	VisitUnaryExpr(unary *Unary)
+	VisitVariableExpr(variable *Variable)
 }
 
 type Binary struct {
@@ -63,4 +64,16 @@ func (u *Unary) Name() string {
 
 func (u *Unary) Accept(visitor ExpressionVisitor) {
 	visitor.VisitUnaryExpr(u)
+}
+
+type Variable struct {
+	VarName *token.Token
+}
+
+func (v *Variable) Name() string {
+	return "Variable"
+}
+
+func (v *Variable) Accept(visitor ExpressionVisitor) {
+	visitor.VisitVariableExpr(v)
 }
