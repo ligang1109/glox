@@ -12,6 +12,14 @@ import (
 
 type Interpreter struct {
 	value any
+
+	enviroment *Environment
+}
+
+func NewInterpreter() *Interpreter {
+	return &Interpreter{
+		enviroment: NewEnvironment(),
+	}
 }
 
 func (in *Interpreter) Interpret(statementList []stmt.Statement) (err error) {
@@ -42,11 +50,8 @@ func (in *Interpreter) setValue(value any) {
 }
 
 func (in *Interpreter) VisitBinaryExpr(binary *expr.Binary) {
-	in.evaluate(binary.Left)
-	left := in.Value()
-
-	in.evaluate(binary.Right)
-	right := in.Value()
+	left := in.evaluate(binary.Left)
+	right := in.evaluate(binary.Right)
 
 	switch binary.Operator.Type {
 	case token.Minus:
@@ -119,24 +124,28 @@ func (in *Interpreter) VisitLiteralExpr(literal *expr.Literal) {
 }
 
 func (in *Interpreter) VisitUnaryExpr(unary *expr.Unary) {
-	in.evaluate(unary.Right)
+	value := in.evaluate(unary.Right)
 
 	switch unary.Operator.Type {
 	case token.Minus:
-		v := in.Value().(float64)
-		in.setValue(-v)
+		in.setValue(-(value.(float64)))
 		return
 	case token.Bang:
-		v := in.Value()
-		in.setValue(!in.isTruthy(v))
+		in.setValue(!in.isTruthy(value))
 		return
 	}
 
 	in.error(unary.Operator, "Unreachable.")
 }
 
-func (in *Interpreter) evaluate(expr expr.Expression) {
+func (in *Interpreter) VisitVariableExpr(variable *expr.Variable) {
+	in.setValue(in.enviroment.Value(variable.VarName))
+}
+
+func (in *Interpreter) evaluate(expr expr.Expression) any {
 	expr.Accept(in)
+
+	return in.Value()
 }
 
 func (in *Interpreter) isTruthy(value any) bool {
@@ -185,6 +194,15 @@ func (in *Interpreter) VisitExpressionStmt(exp *stmt.Expression) {
 }
 
 func (in *Interpreter) VisitPrintStmt(p *stmt.Print) {
-	in.evaluate(p.Exp)
-	fmt.Println(in.Value())
+	value := in.evaluate(p.Exp)
+	fmt.Println(value)
+}
+
+func (in *Interpreter) VisitVarStmt(v *stmt.Var) {
+	var value any
+	if v.Initializer != nil {
+		value = in.evaluate(v.Initializer)
+	}
+
+	in.enviroment.Define(v.Variable.Lexeme, value)
 }

@@ -11,8 +11,6 @@ import (
 )
 
 func main() {
-	log.Init()
-
 	nargs := len(os.Args)
 	if nargs > 2 {
 		log.Logger.Error(fmt.Sprintf("usage: %s [file]", os.Args[0]))

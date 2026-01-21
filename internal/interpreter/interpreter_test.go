@@ -15,9 +15,8 @@ func interpret(source string) {
 		fmt.Println(i, token)
 	}
 	parser := &parser.Parser{}
-	statementList, err := parser.Parse(tokens)
-	if err != nil {
-		fmt.Println("parser.Parse error:", err)
+	statementList := parser.Parse(tokens)
+	if parser.HasError() {
 		return
 	}
 

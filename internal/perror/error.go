@@ -21,6 +21,10 @@ func newTokenError(token *token.Token, prefix, message string) *tokenError {
 }
 
 func (e *tokenError) Error() string {
+	if e.token == nil {
+		return fmt.Sprintf("%s, %s", e.prefix, e.message)
+	}
+
 	var pos string
 	if e.token.Type == token.Eof {
 		pos = "end"
