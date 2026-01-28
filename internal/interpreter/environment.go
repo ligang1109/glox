@@ -8,12 +8,14 @@ import (
 )
 
 type Environment struct {
-	valueMap map[string]any
+	enclosing *Environment
+	valueMap  map[string]any
 }
 
-func NewEnvironment() *Environment {
+func NewEnvironment(enclosing *Environment) *Environment {
 	return &Environment{
-		valueMap: map[string]any{},
+		enclosing: enclosing,
+		valueMap:  map[string]any{},
 	}
 }
 
@@ -23,20 +25,29 @@ func (e *Environment) Define(name string, value any) {
 
 func (e *Environment) Value(name *token.Token) any {
 	v, ok := e.valueMap[name.Lexeme]
-	if !ok {
+	if ok {
+		return v
+	}
+
+	if e.enclosing == nil {
 		e.error(fmt.Sprintf("Undefined variable %s.", name.Lexeme))
 	}
 
-	return v
+	return e.enclosing.Value(name)
 }
 
 func (e *Environment) Assign(name *token.Token, value any) {
 	_, ok := e.valueMap[name.Lexeme]
-	if !ok {
+	if ok {
+		e.valueMap[name.Lexeme] = value
+		return
+	}
+
+	if e.enclosing == nil {
 		e.error(fmt.Sprintf("Undefined variable %s.", name.Lexeme))
 	}
 
-	e.valueMap[name.Lexeme] = value
+	e.enclosing.Assign(name, value)
 }
 
 func (e *Environment) error(message string) {
