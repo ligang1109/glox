@@ -30,6 +30,15 @@ func (e *Environment) Value(name *token.Token) any {
 	return v
 }
 
+func (e *Environment) Assign(name *token.Token, value any) {
+	_, ok := e.valueMap[name.Lexeme]
+	if !ok {
+		e.error(fmt.Sprintf("Undefined variable %s.", name.Lexeme))
+	}
+
+	e.valueMap[name.Lexeme] = value
+}
+
 func (e *Environment) error(message string) {
 	panic(perror.NewRuntimeError(nil, message))
 }

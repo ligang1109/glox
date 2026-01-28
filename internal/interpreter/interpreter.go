@@ -50,8 +50,11 @@ func (in *Interpreter) setValue(value any) {
 }
 
 func (in *Interpreter) VisitBinaryExpr(binary *expr.Binary) {
-	left := in.evaluate(binary.Left)
-	right := in.evaluate(binary.Right)
+	in.evaluate(binary.Left)
+	left := in.Value()
+
+	in.evaluate(binary.Right)
+	right := in.Value()
 
 	switch binary.Operator.Type {
 	case token.Minus:
@@ -124,7 +127,8 @@ func (in *Interpreter) VisitLiteralExpr(literal *expr.Literal) {
 }
 
 func (in *Interpreter) VisitUnaryExpr(unary *expr.Unary) {
-	value := in.evaluate(unary.Right)
+	in.evaluate(unary.Right)
+	value := in.Value()
 
 	switch unary.Operator.Type {
 	case token.Minus:
@@ -142,10 +146,13 @@ func (in *Interpreter) VisitVariableExpr(variable *expr.Variable) {
 	in.setValue(in.enviroment.Value(variable.VarName))
 }
 
-func (in *Interpreter) evaluate(expr expr.Expression) any {
-	expr.Accept(in)
+func (in *Interpreter) VisitAssignExpr(assign *expr.Assign) {
+	in.evaluate(assign.Value)
+	in.enviroment.Assign(assign.VarName, in.Value())
+}
 
-	return in.Value()
+func (in *Interpreter) evaluate(expr expr.Expression) {
+	expr.Accept(in)
 }
 
 func (in *Interpreter) isTruthy(value any) bool {
@@ -194,14 +201,16 @@ func (in *Interpreter) VisitExpressionStmt(exp *stmt.Expression) {
 }
 
 func (in *Interpreter) VisitPrintStmt(p *stmt.Print) {
-	value := in.evaluate(p.Exp)
-	fmt.Println(value)
+	in.evaluate(p.Exp)
+
+	fmt.Println(in.Value())
 }
 
 func (in *Interpreter) VisitVarStmt(v *stmt.Var) {
 	var value any
 	if v.Initializer != nil {
-		value = in.evaluate(v.Initializer)
+		in.evaluate(v.Initializer)
+		value = in.Value()
 	}
 
 	in.enviroment.Define(v.Variable.Lexeme, value)

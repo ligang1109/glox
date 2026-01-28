@@ -153,3 +153,17 @@ func (v *PrintVisitor) VisitVariableExpr(variable *Variable) {
 
 	v.drawNode(node)
 }
+
+func (v *PrintVisitor) VisitAssignExpr(assign *Assign) {
+	node := v.curNode
+	if node == nil {
+		node = v.newNode(assign.Name(), nil)
+	}
+	v.drawNode(node)
+
+	child := v.newNode(fmt.Sprintf("var %s =", assign.VarName.Lexeme), node)
+	v.drawNode(child)
+
+	child = v.newNode(assign.Value.Name(), node)
+	v.drawChild(child, assign.Value)
+}

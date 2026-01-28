@@ -13,6 +13,7 @@ type ExpressionVisitor interface {
 	VisitLiteralExpr(literal *Literal)
 	VisitUnaryExpr(unary *Unary)
 	VisitVariableExpr(variable *Variable)
+	VisitAssignExpr(assign *Assign)
 }
 
 type Binary struct {
@@ -76,4 +77,17 @@ func (v *Variable) Name() string {
 
 func (v *Variable) Accept(visitor ExpressionVisitor) {
 	visitor.VisitVariableExpr(v)
+}
+
+type Assign struct {
+	VarName *token.Token
+	Value   Expression
+}
+
+func (a *Assign) Name() string {
+	return "Assign"
+}
+
+func (a *Assign) Accept(visitor ExpressionVisitor) {
+	visitor.VisitAssignExpr(a)
 }

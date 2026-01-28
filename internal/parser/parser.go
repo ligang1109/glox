@@ -110,7 +110,26 @@ func (p *Parser) expressionStatement() *stmt.Expression {
 }
 
 func (p *Parser) expression() expr.Expression {
-	return p.equality()
+	return p.assignment()
+}
+
+func (p *Parser) assignment() expr.Expression {
+	exp := p.equality()
+	if !p.match(token.Equal) {
+		return exp
+	}
+
+	equal := p.previous()
+	value := p.assignment()
+	variable, ok := exp.(*expr.Variable)
+	if !ok {
+		p.error(equal, "Invalid assignment target.")
+	}
+
+	return &expr.Assign{
+		VarName: variable.VarName,
+		Value:   value,
+	}
 }
 
 func (p *Parser) equality() expr.Expression {
@@ -240,7 +259,7 @@ func (p *Parser) primary() expr.Expression {
 		}
 	}
 
-	p.error("Unexpected token.")
+	p.error(nil, "Unexpected token.")
 
 	return nil
 }
@@ -301,13 +320,17 @@ func (p *Parser) consume(tokenType token.Type, message string) *token.Token {
 		return p.advance()
 	}
 
-	p.error(message)
+	p.error(nil, message)
 
 	return nil
 }
 
-func (p *Parser) error(message string) {
-	panic(perror.NewParseError(p.peek(), message))
+func (p *Parser) error(token *token.Token, message string) {
+	if token == nil {
+		token = p.peek()
+	}
+
+	panic(perror.NewParseError(token, message))
 }
 
 func (p *Parser) synchronize() {

@@ -36,7 +36,7 @@ func TestParser(t *testing.T) {
 		1+2;
 		print true;
 		var a = 1;
-		var b;
+		b = a;
 		`
 
 	parseSource(source)
