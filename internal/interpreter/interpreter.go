@@ -22,19 +22,13 @@ func NewInterpreter() *Interpreter {
 	}
 }
 
-func (in *Interpreter) Interpret(statementList []stmt.Statement) (err error) {
-	defer func() {
-		if v := recover(); v != nil {
-			ok := false
-			err, ok = v.(*perror.RuntimeError)
-			if !ok {
-				err = fmt.Errorf("Interpreter.Interpret recover from %v", v)
-			}
-		}
-	}()
-
+func (in *Interpreter) Interpret(statementList []stmt.Statement) error {
 	for _, statement := range statementList {
-		statement.Accept(in)
+		err := in.evaluateStmt(statement)
+		if err != nil {
+			return err
+		}
+
 		fmt.Println(in.Value())
 	}
 
@@ -49,110 +43,34 @@ func (in *Interpreter) setValue(value any) {
 	in.value = value
 }
 
-func (in *Interpreter) VisitBinaryExpr(binary *expr.Binary) {
-	in.evaluate(binary.Left)
-	left := in.Value()
-
-	in.evaluate(binary.Right)
-	right := in.Value()
-
-	switch binary.Operator.Type {
-	case token.Minus:
-		values := in.checkNumberOperands(binary.Operator, left, right)
-		in.setValue(values[0] - values[1])
-		return
-	case token.Slash:
-		values := in.checkNumberOperands(binary.Operator, left, right)
-		in.setValue(values[0] / values[1])
-		return
-	case token.Star:
-		values := in.checkNumberOperands(binary.Operator, left, right)
-		in.setValue(values[0] * values[1])
-		return
-	case token.Greater:
-		values := in.checkNumberOperands(binary.Operator, left, right)
-		in.setValue(values[0] > values[1])
-		return
-	case token.GreaterEqual:
-		values := in.checkNumberOperands(binary.Operator, left, right)
-		in.setValue(values[0] >= values[1])
-		return
-	case token.Less:
-		values := in.checkNumberOperands(binary.Operator, left, right)
-		in.setValue(values[0] < values[1])
-		return
-	case token.LessEqual:
-		values := in.checkNumberOperands(binary.Operator, left, right)
-		in.setValue(values[0] <= values[1])
-		return
-	case token.BangEqual:
-		in.setValue(!in.isEqual(left, right))
-		return
-	case token.EqualEqual:
-		in.setValue(in.isEqual(left, right))
-		return
-	case token.Plus:
-		lv, ok := left.(float64)
-		if ok {
-			rv, ok := right.(float64)
-			if ok {
-				in.setValue(lv + rv)
-				return
+func (in *Interpreter) evaluate(name string, f func()) (err error) {
+	defer func() {
+		if v := recover(); v != nil {
+			ok := false
+			err, ok = v.(*perror.RuntimeError)
+			if !ok {
+				err = fmt.Errorf("%s recover from %v", name, v)
 			}
-			in.error(binary.Operator, "Right is not number.")
 		}
+	}()
 
-		ls, ok := left.(string)
-		if ok {
-			rs, ok := right.(string)
-			if ok {
-				in.setValue(ls + rs)
-				return
-			}
-			in.error(binary.Operator, "Right is not string.")
-		}
+	f()
 
-		in.error(binary.Operator, "Operands must be two numbers or two strings.")
-	}
-
-	in.error(binary.Operator, "Unreachable.")
+	return nil
 }
 
-func (in *Interpreter) VisitGroupingExpr(grouping *expr.Grouping) {
-	in.evaluate(grouping.Expression)
+func (in *Interpreter) evaluateStmt(statement stmt.Statement) (err error) {
+	return in.evaluate("evaluateStmt",
+		func() {
+			statement.Accept(in)
+		})
 }
 
-func (in *Interpreter) VisitLiteralExpr(literal *expr.Literal) {
-	in.setValue(literal.Value)
-}
-
-func (in *Interpreter) VisitUnaryExpr(unary *expr.Unary) {
-	in.evaluate(unary.Right)
-	value := in.Value()
-
-	switch unary.Operator.Type {
-	case token.Minus:
-		in.setValue(-(value.(float64)))
-		return
-	case token.Bang:
-		in.setValue(!in.isTruthy(value))
-		return
-	}
-
-	in.error(unary.Operator, "Unreachable.")
-}
-
-func (in *Interpreter) VisitVariableExpr(variable *expr.Variable) {
-	in.setValue(in.enviroment.Value(variable.VarName))
-}
-
-func (in *Interpreter) VisitAssignExpr(assign *expr.Assign) {
-	in.evaluate(assign.Value)
-	in.enviroment.Assign(assign.VarName, in.Value())
-}
-
-func (in *Interpreter) evaluate(expr expr.Expression) {
-	expr.Accept(in)
+func (in *Interpreter) evaluateExpr(expression expr.Expression) (err error) {
+	return in.evaluate("evaluateExpr",
+		func() {
+			expression.Accept(in)
+		})
 }
 
 func (in *Interpreter) isTruthy(value any) bool {
@@ -194,24 +112,4 @@ func (in *Interpreter) checkNumberOperands(operator *token.Token, values ...any)
 
 func (in *Interpreter) error(token *token.Token, message string) {
 	panic(perror.NewRuntimeError(token, message))
-}
-
-func (in *Interpreter) VisitExpressionStmt(exp *stmt.Expression) {
-	in.evaluate(exp.Exp)
-}
-
-func (in *Interpreter) VisitPrintStmt(p *stmt.Print) {
-	in.evaluate(p.Exp)
-
-	fmt.Println(in.Value())
-}
-
-func (in *Interpreter) VisitVarStmt(v *stmt.Var) {
-	var value any
-	if v.Initializer != nil {
-		in.evaluate(v.Initializer)
-		value = in.Value()
-	}
-
-	in.enviroment.Define(v.Variable.Lexeme, value)
 }

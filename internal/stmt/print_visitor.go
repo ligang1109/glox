@@ -32,3 +32,9 @@ func (pv *PrintVisitor) VisitVarStmt(v *Var) {
 		VarName: v.Variable,
 	})
 }
+
+func (pv *PrintVisitor) VisitBlockStmt(b *Block) {
+	for _, statement := range b.StatementList {
+		statement.Accept(pv)
+	}
+}

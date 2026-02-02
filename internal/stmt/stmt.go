@@ -14,6 +14,7 @@ type StatementVisitor interface {
 	VisitExpressionStmt(exp *Expression)
 	VisitPrintStmt(p *Print)
 	VisitVarStmt(v *Var)
+	VisitBlockStmt(b *Block)
 }
 
 type Expression struct {
@@ -51,4 +52,16 @@ func (v *Var) Name() string {
 
 func (v *Var) Accept(visitor StatementVisitor) {
 	visitor.VisitVarStmt(v)
+}
+
+type Block struct {
+	StatementList []Statement
+}
+
+func (b *Block) Name() string {
+	return "Block"
+}
+
+func (b *Block) Accept(visitor StatementVisitor) {
+	visitor.VisitBlockStmt(b)
 }
