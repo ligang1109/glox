@@ -29,7 +29,7 @@ func (in *Interpreter) Interpret(statementList []stmt.Statement) error {
 			return err
 		}
 
-		fmt.Println(in.Value())
+		// fmt.Println(in.Value())
 	}
 
 	return nil

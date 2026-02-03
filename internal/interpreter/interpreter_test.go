@@ -20,7 +20,7 @@ func interpret(source string) {
 		return
 	}
 
-	interpreter := &Interpreter{}
+	interpreter := NewInterpreter()
 	e := interpreter.Interpret(statementList)
 	if e != nil {
 		fmt.Println("interpreter.Interpret error:", e)
@@ -33,5 +33,29 @@ func TestInterpreter(t *testing.T) {
 		3-1;
 		(3+4) * -5;
 		print true;
+		`)
+}
+
+func TestBlock(t *testing.T) {
+	interpret(`
+var a = "global a";
+var b = "global b";
+var c = "global c";
+{
+  var a = "outer a";
+  var b = "outer b";
+  {
+    var a = "inner a";
+    print a;
+    print b;
+    print c;
+  }
+  print a;
+  print b;
+  print c;
+}
+print a;
+print b;
+print c;
 		`)
 }
