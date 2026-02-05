@@ -31,6 +31,10 @@ func (p *Parser) varDeclaration() *stmt.Var {
 }
 
 func (p *Parser) statement() stmt.Statement {
+	if p.match(token.If) {
+		return p.ifStatement()
+	}
+
 	if p.match(token.Print) {
 		return p.printStatement()
 	}
@@ -40,6 +44,23 @@ func (p *Parser) statement() stmt.Statement {
 	}
 
 	return p.expressionStatement()
+}
+
+func (p *Parser) ifStatement() *stmt.If {
+	p.consume(token.LeftParen, "Expect '(' after 'if'.")
+	condition := p.expression()
+	p.consume(token.RightParen, "Expect ')' after if condition.")
+
+	ifStmt := &stmt.If{
+		Condition:  condition,
+		ThenBranch: p.statement(),
+		ElseBranch: nil,
+	}
+	if p.match(token.Else) {
+		ifStmt.ElseBranch = p.statement()
+	}
+
+	return ifStmt
 }
 
 func (p *Parser) printStatement() *stmt.Print {

@@ -23,6 +23,10 @@ func (pv *PrintVisitor) VisitExpressionStmt(exp *Expression) {
 	pv.drawExpression(exp.Exp)
 }
 
+func (pv *PrintVisitor) VisitIfStmt(s *If) {
+	// need implement
+}
+
 func (pv *PrintVisitor) VisitPrintStmt(p *Print) {
 	pv.drawExpression(p.Exp)
 }

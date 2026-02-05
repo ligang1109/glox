@@ -12,6 +12,7 @@ type Statement interface {
 
 type StatementVisitor interface {
 	VisitExpressionStmt(exp *Expression)
+	VisitIfStmt(s *If)
 	VisitPrintStmt(p *Print)
 	VisitVarStmt(v *Var)
 	VisitBlockStmt(b *Block)
@@ -27,6 +28,20 @@ func (e *Expression) Name() string {
 
 func (e *Expression) Accept(visitor StatementVisitor) {
 	visitor.VisitExpressionStmt(e)
+}
+
+type If struct {
+	Condition  expr.Expression
+	ThenBranch Statement
+	ElseBranch Statement
+}
+
+func (s *If) Name() string {
+	return "If"
+}
+
+func (s *If) Accept(visitor StatementVisitor) {
+	visitor.VisitIfStmt(s)
 }
 
 type Print struct {

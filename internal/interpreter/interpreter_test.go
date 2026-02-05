@@ -59,3 +59,14 @@ print b;
 print c;
 		`)
 }
+
+func TestIf(t *testing.T) {
+	interpret(`
+	var a = 1;
+	if (a > 1) {
+		print "greater 1";
+	} else {
+		print "less equal 1";
+	}
+		`)
+}

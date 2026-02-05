@@ -22,14 +22,24 @@ func NewInterpreter() *Interpreter {
 	}
 }
 
-func (in *Interpreter) Interpret(statementList []stmt.Statement) error {
-	for _, statement := range statementList {
-		err := in.evaluateStmt(statement)
-		if err != nil {
-			return err
+func (in *Interpreter) Interpret(statementList []stmt.Statement) (err error) {
+	defer func() {
+		if v := recover(); v != nil {
+			ok := false
+			err, ok = v.(*perror.RuntimeError)
+			if !ok {
+				err = fmt.Errorf("evaluateStmt recover from %v", v)
+			}
 		}
+	}()
 
-		// fmt.Println(in.Value())
+	for _, statement := range statementList {
+		in.evaluateStmt(statement)
+
+		v := in.Value()
+		if v != nil {
+			fmt.Println(in.Value())
+		}
 	}
 
 	return nil
@@ -43,34 +53,12 @@ func (in *Interpreter) setValue(value any) {
 	in.value = value
 }
 
-func (in *Interpreter) evaluate(name string, f func()) (err error) {
-	defer func() {
-		if v := recover(); v != nil {
-			ok := false
-			err, ok = v.(*perror.RuntimeError)
-			if !ok {
-				err = fmt.Errorf("%s recover from %v", name, v)
-			}
-		}
-	}()
-
-	f()
-
-	return nil
+func (in *Interpreter) evaluateStmt(statement stmt.Statement) {
+	statement.Accept(in)
 }
 
-func (in *Interpreter) evaluateStmt(statement stmt.Statement) (err error) {
-	return in.evaluate("evaluateStmt",
-		func() {
-			statement.Accept(in)
-		})
-}
-
-func (in *Interpreter) evaluateExpr(expression expr.Expression) (err error) {
-	return in.evaluate("evaluateExpr",
-		func() {
-			expression.Accept(in)
-		})
+func (in *Interpreter) evaluateExpr(expression expr.Expression) {
+	expression.Accept(in)
 }
 
 func (in *Interpreter) isTruthy(value any) bool {

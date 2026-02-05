@@ -10,10 +10,23 @@ func (in *Interpreter) VisitExpressionStmt(exp *stmt.Expression) {
 	in.evaluateExpr(exp.Exp)
 }
 
+func (in *Interpreter) VisitIfStmt(s *stmt.If) {
+	in.evaluateExpr(s.Condition)
+	if in.isTruthy(in.Value()) {
+		in.evaluateStmt(s.ThenBranch)
+	} else if s.ElseBranch != nil {
+		in.evaluateStmt(s.ElseBranch)
+	}
+
+	in.setValue(nil)
+}
+
 func (in *Interpreter) VisitPrintStmt(p *stmt.Print) {
 	in.evaluateExpr(p.Exp)
 
 	fmt.Println(in.Value())
+
+	in.setValue(nil)
 }
 
 func (in *Interpreter) VisitVarStmt(v *stmt.Var) {
