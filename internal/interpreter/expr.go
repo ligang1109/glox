@@ -106,3 +106,19 @@ func (in *Interpreter) VisitAssignExpr(assign *expr.Assign) {
 	in.evaluateExpr(assign.Value)
 	in.enviroment.Assign(assign.VarName, in.Value())
 }
+
+func (in *Interpreter) VisitLogicalExpr(logical *expr.Logical) {
+	in.evaluateExpr(logical.Left)
+
+	if in.isTruthy(in.Value()) {
+		if logical.Operator.Type == token.Or {
+			return
+		}
+	} else {
+		if logical.Operator.Type == token.And {
+			return
+		}
+	}
+
+	in.evaluateExpr(logical.Right)
+}

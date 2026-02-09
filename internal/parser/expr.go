@@ -10,7 +10,7 @@ func (p *Parser) expression() expr.Expression {
 }
 
 func (p *Parser) assignment() expr.Expression {
-	exp := p.equality()
+	exp := p.logicOr()
 	if !p.match(token.Equal) {
 		return exp
 	}
@@ -26,6 +26,44 @@ func (p *Parser) assignment() expr.Expression {
 		VarName: variable.VarName,
 		Value:   value,
 	}
+}
+
+func (p *Parser) logicOr() expr.Expression {
+	exp := p.logicAnd()
+	for {
+		if p.match(token.Or) {
+			operator := p.previous()
+			right := p.logicAnd()
+			exp = &expr.Logical{
+				Left:     exp,
+				Operator: operator,
+				Right:    right,
+			}
+		} else {
+			break
+		}
+	}
+
+	return exp
+}
+
+func (p *Parser) logicAnd() expr.Expression {
+	exp := p.equality()
+	for {
+		if p.match(token.And) {
+			operator := p.previous()
+			right := p.equality()
+			exp = &expr.Logical{
+				Left:     exp,
+				Operator: operator,
+				Right:    right,
+			}
+		} else {
+			break
+		}
+	}
+
+	return exp
 }
 
 func (p *Parser) equality() expr.Expression {

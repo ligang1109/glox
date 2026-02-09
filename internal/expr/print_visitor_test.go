@@ -40,3 +40,27 @@ func TestPrintVisitor(t *testing.T) {
 
 	t.Log(visitor.Graph())
 }
+
+func TestVisitLogicalExpr(t *testing.T) {
+	// a or b
+	logical := &Logical{
+		Left: &Variable{
+			VarName: &token.Token{
+				Lexeme: "a",
+			},
+		},
+		Operator: &token.Token{
+			Lexeme: "OR",
+		},
+		Right: &Variable{
+			VarName: &token.Token{
+				Lexeme: "b",
+			},
+		},
+	}
+
+	visitor := NewPrintVisitor()
+	logical.Accept(visitor)
+
+	t.Log(visitor.Graph())
+}

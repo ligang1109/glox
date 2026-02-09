@@ -167,3 +167,20 @@ func (v *PrintVisitor) VisitAssignExpr(assign *Assign) {
 	child = v.newNode(assign.Value.Name(), node)
 	v.drawChild(child, assign.Value)
 }
+
+func (v *PrintVisitor) VisitLogicalExpr(logical *Logical) {
+	node := v.curNode
+	if node == nil {
+		node = v.newNode(logical.Name(), nil)
+	}
+	v.drawNode(node)
+
+	child := v.newNode(logical.Left.Name(), node)
+	v.drawChild(child, logical.Left)
+
+	child = v.newNode(fmt.Sprintf("Operator %s", logical.Operator.Lexeme), node)
+	v.drawNode(child)
+
+	child = v.newNode(logical.Right.Name(), node)
+	v.drawChild(child, logical.Right)
+}

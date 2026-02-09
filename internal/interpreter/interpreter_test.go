@@ -70,3 +70,12 @@ func TestIf(t *testing.T) {
 	}
 		`)
 }
+
+func TestLogical(t *testing.T) {
+	interpret(`
+print "hi" or 2; // "hi".
+print nil or "yes"; // "yes".
+print "hi" and 2; // "hi".
+print nil and "yes"; // "nil".
+		`)
+}

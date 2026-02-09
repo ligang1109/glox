@@ -14,12 +14,13 @@ type ExpressionVisitor interface {
 	VisitUnaryExpr(unary *Unary)
 	VisitVariableExpr(variable *Variable)
 	VisitAssignExpr(assign *Assign)
+	VisitLogicalExpr(logical *Logical)
 }
 
 type Binary struct {
 	Left     Expression
-	Right    Expression
 	Operator *token.Token
+	Right    Expression
 }
 
 func (b *Binary) Name() string {
@@ -90,4 +91,18 @@ func (a *Assign) Name() string {
 
 func (a *Assign) Accept(visitor ExpressionVisitor) {
 	visitor.VisitAssignExpr(a)
+}
+
+type Logical struct {
+	Left     Expression
+	Operator *token.Token
+	Right    Expression
+}
+
+func (l *Logical) Name() string {
+	return "Logical"
+}
+
+func (l *Logical) Accept(visitor ExpressionVisitor) {
+	visitor.VisitLogicalExpr(l)
 }
