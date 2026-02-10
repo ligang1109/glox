@@ -24,7 +24,11 @@ func (pv *PrintVisitor) VisitExpressionStmt(exp *Expression) {
 }
 
 func (pv *PrintVisitor) VisitIfStmt(s *If) {
-	// need implement
+	pv.drawExpression(s.Condition)
+	s.ThenBranch.Accept(pv)
+	if s.ElseBranch != nil {
+		s.ElseBranch.Accept(pv)
+	}
 }
 
 func (pv *PrintVisitor) VisitPrintStmt(p *Print) {
@@ -41,4 +45,9 @@ func (pv *PrintVisitor) VisitBlockStmt(b *Block) {
 	for _, statement := range b.StatementList {
 		statement.Accept(pv)
 	}
+}
+
+func (pv *PrintVisitor) VisitWhileStmt(w *While) {
+	pv.drawExpression(w.Condition)
+	w.Body.Accept(pv)
 }

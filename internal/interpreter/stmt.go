@@ -50,3 +50,15 @@ func (in *Interpreter) VisitBlockStmt(b *stmt.Block) {
 
 	in.enviroment = previous
 }
+
+func (in *Interpreter) VisitWhileStmt(w *stmt.While) {
+	for {
+		in.evaluateExpr(w.Condition)
+		if !in.isTruthy(in.Value()) {
+			in.setValue(nil)
+			return
+		}
+
+		in.evaluateStmt(w.Body)
+	}
+}

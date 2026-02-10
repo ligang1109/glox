@@ -16,6 +16,7 @@ type StatementVisitor interface {
 	VisitPrintStmt(p *Print)
 	VisitVarStmt(v *Var)
 	VisitBlockStmt(b *Block)
+	VisitWhileStmt(w *While)
 }
 
 type Expression struct {
@@ -79,4 +80,17 @@ func (b *Block) Name() string {
 
 func (b *Block) Accept(visitor StatementVisitor) {
 	visitor.VisitBlockStmt(b)
+}
+
+type While struct {
+	Condition expr.Expression
+	Body      Statement
+}
+
+func (w *While) Name() string {
+	return "While"
+}
+
+func (w *While) Accept(visitor StatementVisitor) {
+	visitor.VisitWhileStmt(w)
 }

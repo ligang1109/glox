@@ -39,6 +39,10 @@ func (p *Parser) statement() stmt.Statement {
 		return p.printStatement()
 	}
 
+	if p.match(token.While) {
+		return p.whileStatement()
+	}
+
 	if p.match(token.LeftBrace) {
 		return p.blockStatement()
 	}
@@ -78,6 +82,18 @@ func (p *Parser) expressionStatement() *stmt.Expression {
 
 	return &stmt.Expression{
 		Exp: exp,
+	}
+}
+
+func (p *Parser) whileStatement() *stmt.While {
+	p.consume(token.LeftParen, "Expect '(' after 'while'.")
+	condition := p.expression()
+	p.consume(token.RightParen, "Expect ')' after condition.")
+	body := p.statement()
+
+	return &stmt.While{
+		Condition: condition,
+		Body:      body,
 	}
 }
 

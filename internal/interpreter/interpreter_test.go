@@ -79,3 +79,11 @@ print "hi" and 2; // "hi".
 print nil and "yes"; // "nil".
 		`)
 }
+
+func TestWhileStatement(t *testing.T) {
+	interpret(`
+	var i = 1;
+	while (i < 3)
+		print i = i + 1;
+		`)
+}
