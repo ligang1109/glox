@@ -31,6 +31,10 @@ func (p *Parser) varDeclaration() *stmt.Var {
 }
 
 func (p *Parser) statement() stmt.Statement {
+	if p.match(token.For) {
+		return p.forStatement()
+	}
+
 	if p.match(token.If) {
 		return p.ifStatement()
 	}
@@ -48,6 +52,58 @@ func (p *Parser) statement() stmt.Statement {
 	}
 
 	return p.expressionStatement()
+}
+
+func (p *Parser) forStatement() stmt.Statement {
+	p.consume(token.LeftParen, "Expect '(' after 'for'.")
+	var initializer stmt.Statement
+	if !p.match(token.Semicolon) {
+		if p.match(token.Var) {
+			initializer = p.varDeclaration()
+		} else {
+			initializer = p.expressionStatement()
+
+		}
+	}
+
+	var condition expr.Expression
+	if !p.check(token.Semicolon) {
+		condition = p.expression()
+	} else {
+		condition = &expr.Literal{
+			Value: true,
+		}
+	}
+	p.consume(token.Semicolon, "Expect ';' after loop condition.")
+
+	var increment expr.Expression
+	if !p.check(token.RightParen) {
+		increment = p.expression()
+	}
+	p.consume(token.RightParen, "Expect ')' after for clauses.")
+
+	body := p.statement()
+	if increment != nil {
+		body = &stmt.Block{
+			StatementList: []stmt.Statement{
+				body,
+				&stmt.Expression{
+					Exp: increment,
+				}},
+		}
+	}
+
+	body = &stmt.While{
+		Condition: condition,
+		Body:      body,
+	}
+	if initializer != nil {
+		body = &stmt.Block{
+			StatementList: []stmt.Statement{initializer, body},
+		}
+	}
+
+	return body
 }
 
 func (p *Parser) ifStatement() *stmt.If {

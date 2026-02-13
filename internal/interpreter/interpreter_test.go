@@ -87,3 +87,11 @@ func TestWhileStatement(t *testing.T) {
 		print i = i + 1;
 		`)
 }
+
+func TestForStatement(t *testing.T) {
+	interpret(`
+for (var i = 0; i < 100; i = i + 1) {
+  print i;
+}
+		`)
+}
