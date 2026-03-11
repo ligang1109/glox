@@ -15,6 +15,7 @@ type ExpressionVisitor interface {
 	VisitVariableExpr(variable *Variable)
 	VisitAssignExpr(assign *Assign)
 	VisitLogicalExpr(logical *Logical)
+	VisitCallExpr(call *Call)
 }
 
 type Binary struct {
@@ -105,4 +106,18 @@ func (l *Logical) Name() string {
 
 func (l *Logical) Accept(visitor ExpressionVisitor) {
 	visitor.VisitLogicalExpr(l)
+}
+
+type Call struct {
+	Callee    Expression
+	Paren     *token.Token
+	Arguments []Expression
+}
+
+func (c *Call) Name() string {
+	return "Call"
+}
+
+func (c *Call) Accept(visitor ExpressionVisitor) {
+	visitor.VisitCallExpr(c)
 }

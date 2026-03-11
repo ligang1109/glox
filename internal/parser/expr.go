@@ -152,7 +152,39 @@ func (p *Parser) unary() expr.Expression {
 		}
 	}
 
-	return p.primary()
+	return p.call()
+}
+
+func (p *Parser) call() expr.Expression {
+	exp := p.primary()
+	for {
+		if p.match(token.LeftParen) {
+			exp = p.finishCall(exp)
+		} else {
+			break
+		}
+	}
+
+	return exp
+}
+
+func (p *Parser) finishCall(callee expr.Expression) *expr.Call {
+	arguments := []expr.Expression{}
+	if !p.check(token.RightParen) {
+		for {
+			arguments = append(arguments, p.expression())
+			if !p.match(token.Comma) {
+				break
+			}
+		}
+	}
+
+	paren := p.consume(token.RightParen, "Expect ')' after arguments.")
+	return &expr.Call{
+		Callee:    callee,
+		Paren:     paren,
+		Arguments: arguments,
+	}
 }
 
 func (p *Parser) primary() expr.Expression {

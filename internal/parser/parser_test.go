@@ -41,3 +41,12 @@ func TestParser(t *testing.T) {
 
 	parseSource(source)
 }
+
+func TestParseCall(t *testing.T) {
+	source :=
+		`
+average(1, 2);
+		`
+
+	parseSource(source)
+}

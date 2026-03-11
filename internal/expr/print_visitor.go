@@ -184,3 +184,26 @@ func (v *PrintVisitor) VisitLogicalExpr(logical *Logical) {
 	child = v.newNode(logical.Right.Name(), node)
 	v.drawChild(child, logical.Right)
 }
+
+func (v *PrintVisitor) VisitCallExpr(call *Call) {
+	callNode := v.curNode
+	if callNode == nil {
+		callNode = v.newNode(call.Name(), nil)
+	}
+	v.drawNode(callNode)
+
+	calleeNode := v.newNode("Callee", callNode)
+	v.drawNode(calleeNode)
+
+	child := v.newNode(call.Callee.Name(), calleeNode)
+	v.drawChild(child, call.Callee)
+	v.curNode = callNode
+
+	argumentsNode := v.newNode("Arguments", callNode)
+	v.drawNode(argumentsNode)
+	for _, arg := range call.Arguments {
+		child := v.newNode(arg.Name(), argumentsNode)
+		v.drawChild(child, arg)
+	}
+	v.curNode = callNode
+}
