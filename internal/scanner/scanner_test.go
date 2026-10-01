@@ -15,6 +15,7 @@ func TestScanHello(t *testing.T) {
 		// Your first Lox program!
 		print "Hello, world!";	
 		`,
+		`a1 = 1`,
 	}
 
 	scanSourceList(t, sourceList)
