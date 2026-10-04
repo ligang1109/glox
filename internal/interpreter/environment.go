@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ligang1109/glox/internal/perror"
-	"github.com/ligang1109/glox/pkg/token"
+	"github.com/ligang1109/glox/internal/token"
 )
 
 type Environment struct {

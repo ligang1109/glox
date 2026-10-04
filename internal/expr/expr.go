@@ -1,6 +1,6 @@
 package expr
 
-import "github.com/ligang1109/glox/pkg/token"
+import "github.com/ligang1109/glox/internal/token"
 
 type Expression interface {
 	Name() string

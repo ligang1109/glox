@@ -7,7 +7,7 @@ import (
 
 	"github.com/goinbox/golog"
 
-	"github.com/ligang1109/glox/pkg/log"
+	"github.com/ligang1109/glox/internal/log"
 )
 
 func main() {

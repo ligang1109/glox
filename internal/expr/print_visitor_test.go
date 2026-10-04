@@ -3,7 +3,7 @@ package expr
 import (
 	"testing"
 
-	"github.com/ligang1109/glox/pkg/token"
+	"github.com/ligang1109/glox/internal/token"
 )
 
 func TestPrintVisitor(t *testing.T) {

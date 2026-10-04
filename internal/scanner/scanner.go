@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/ligang1109/glox/pkg/log"
-	"github.com/ligang1109/glox/pkg/token"
+	"github.com/ligang1109/glox/internal/log"
+	"github.com/ligang1109/glox/internal/token"
 )
 
 type Scanner struct {

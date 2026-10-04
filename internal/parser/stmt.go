@@ -3,7 +3,7 @@ package parser
 import (
 	"github.com/ligang1109/glox/internal/expr"
 	"github.com/ligang1109/glox/internal/stmt"
-	"github.com/ligang1109/glox/pkg/token"
+	"github.com/ligang1109/glox/internal/token"
 )
 
 func (p *Parser) declaration() stmt.Statement {

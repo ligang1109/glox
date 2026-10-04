@@ -7,7 +7,7 @@ import (
 	"github.com/ligang1109/glox/internal/expr"
 	"github.com/ligang1109/glox/internal/perror"
 	"github.com/ligang1109/glox/internal/stmt"
-	"github.com/ligang1109/glox/pkg/token"
+	"github.com/ligang1109/glox/internal/token"
 )
 
 type Interpreter struct {
