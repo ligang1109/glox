@@ -1,28 +1,24 @@
 package ast
 
-type Node interface {
-	Name() string
-}
+// Value is a lox value
+type Value = any
 
-type Value any
+// VisitResult is what a visitor produces when visiting a node
+type VisitResult = any
 
 type Expr interface {
-	Node
-
-	Accept(visitor ExprVisitor) Value
+	Accept(visitor ExprVisitor) VisitResult
 }
 
 type Stmt interface {
-	Node
-
-	Accept(visitor StmtVisitor)
+	Accept(visitor StmtVisitor) VisitResult
 }
 
 type ExprVisitor interface {
-	VisitBinary(binary *Binary) Value
-	VisitGrouping(grouping *Grouping) Value
-	VisitLiteral(literal *Literal) Value
-	VisitUnary(unary *Unary) Value
+	VisitBinary(binary *Binary) VisitResult
+	VisitGrouping(grouping *Grouping) VisitResult
+	VisitLiteral(literal *Literal) VisitResult
+	VisitUnary(unary *Unary) VisitResult
 }
 
 type StmtVisitor interface {

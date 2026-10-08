@@ -8,11 +8,7 @@ type Binary struct {
 	Right    Expr
 }
 
-func (b *Binary) Name() string {
-	return "Binary"
-}
-
-func (b *Binary) Accept(visitor ExprVisitor) Value {
+func (b *Binary) Accept(visitor ExprVisitor) VisitResult {
 	return visitor.VisitBinary(b)
 }
 
@@ -20,11 +16,7 @@ type Literal struct {
 	Value Value
 }
 
-func (l *Literal) Name() string {
-	return "Literal"
-}
-
-func (l *Literal) Accept(visitor ExprVisitor) Value {
+func (l *Literal) Accept(visitor ExprVisitor) VisitResult {
 	return visitor.VisitLiteral(l)
 }
 
@@ -33,11 +25,7 @@ type Unary struct {
 	Operator *token.Token
 }
 
-func (u *Unary) Name() string {
-	return "Unary"
-}
-
-func (u *Unary) Accept(visitor ExprVisitor) Value {
+func (u *Unary) Accept(visitor ExprVisitor) VisitResult {
 	return visitor.VisitUnary(u)
 }
 
@@ -45,10 +33,6 @@ type Grouping struct {
 	Expr Expr
 }
 
-func (g *Grouping) Name() string {
-	return "Grouping"
-}
-
-func (g *Grouping) Accept(visitor ExprVisitor) Value {
+func (g *Grouping) Accept(visitor ExprVisitor) VisitResult {
 	return visitor.VisitGrouping(g)
 }
