@@ -12,9 +12,9 @@ type tokenError struct {
 	message string
 }
 
-func newTokenError(token *token.Token, prefix, message string) *tokenError {
+func newTokenError(tok *token.Token, prefix, message string) *tokenError {
 	return &tokenError{
-		token:   token,
+		token:   tok,
 		message: message,
 		prefix:  prefix,
 	}
@@ -39,9 +39,9 @@ type ParseError struct {
 	*tokenError
 }
 
-func NewParseError(token *token.Token, message string) *ParseError {
+func NewParseError(tok *token.Token, message string) *ParseError {
 	return &ParseError{
-		tokenError: newTokenError(token, "ParseError", message),
+		tokenError: newTokenError(tok, "ParseError", message),
 	}
 }
 
@@ -49,8 +49,8 @@ type RuntimeError struct {
 	*tokenError
 }
 
-func NewRuntimeError(token *token.Token, message string) *RuntimeError {
+func NewRuntimeError(tok *token.Token, message string) *RuntimeError {
 	return &RuntimeError{
-		tokenError: newTokenError(token, "RuntimeError", message),
+		tokenError: newTokenError(tok, "RuntimeError", message),
 	}
 }
